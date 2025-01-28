@@ -1,0 +1,59 @@
+import numpy as np
+from sklearn.metrics import DistanceMetric
+from util import draw_graph, write_graphml
+
+import networkx as nx
+
+import heapq
+
+
+def knn_graph(X, nr_neighbors, metric, labels=None):
+    size = len(X)
+    dist_mat = DistanceMetric.get_metric(metric).pairwise(X)
+    dist_mat = dist_mat / np.amax(dist_mat)
+
+    # adjusting the number of neighbors in case it is larger than the dataset
+    nr_neighbors = min(nr_neighbors, size - 1)
+
+    # creating the graph
+    g = nx.Graph()
+
+    for i in range(size):
+        g.add_node(i)
+
+    # set labels as node attribute
+    if labels is not None:
+        nx.set_node_attributes(g, dict(enumerate(map(str, labels))), name='label')
+
+    for i in range(size):
+        heap = []
+
+        for j in range(size):
+            dist = dist_mat[i][j]
+
+            if i != j:
+                heapq.heappush(heap, (dist, j))
+
+        for k in range(nr_neighbors):
+            item = heapq.heappop(heap)
+            g.add_edge(i, item[1], weight=(1 - item[0]))
+            g.add_edge(item[1], i, weight=(1 - item[0]))
+
+    return g
+
+
+def gd_knn(X, labels, filename_fig, filename_graph, nr_neighbors=10):
+    metric = 'euclidean'
+
+    g = knn_graph(X,
+                  nr_neighbors=nr_neighbors,
+                  metric=metric,
+                  labels=labels)
+
+    pos = draw_graph(X, g, labels, filename_fig)
+    write_graphml(g, pos, filename_graph)
+
+
+# Press the green button in the gutter to run the script.
+if __name__ == '__main__':
+    gd_knn()
