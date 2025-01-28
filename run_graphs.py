@@ -1,27 +1,20 @@
-from sklearn import preprocessing
-import sklearn.datasets as datasets
+# Author: Fernando V. Paulovich -- <fpaulovich@gmail.com>
+#
+# Copyright (c) 2024 Fernando V. Paulovich
+# License: MIT
 
-from pairwise_gd import mds, gd_pairwise
-from snn_gd import gd_snn
-from knn_gd import gd_knn
-from umap_gd import umap, gd_umap
-from tsne_gd import tsne, gd_tsne
-
-import numpy as np
-
-from umap_gd import umap_graph
-from tsne_gd import tsne_bh_prob_graph, tsne_prob_graph
-from knn_gd import knn_graph
+from techniques.pairwise_gd import mds, gd_pairwise
+from techniques.snn_gd import gd_snn
+from techniques.knn_gd import gd_knn
+from techniques.umap_gd import umap, gd_umap
+from techniques.tsne_gd import tsne, gd_tsne
 
 from sklearn import preprocessing
 import sklearn.datasets as datasets
 
 import networkx as nx
-import math
-import numpy as np
 
 import matplotlib.pyplot as plt
-from knn_gd import knn_graph
 
 
 def run_wine():
@@ -96,30 +89,30 @@ def run_digits():
     nr_neighbors = 15
     perplexity = 15
 
-    # print('MDS')
-    # mds(X=X,
-    #     labels=labels,
-    #     filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_cmds.png')
-    #
-    # print('GD Pairwise')
-    # gd_pairwise(X=X,
-    #             labels=labels,
-    #             filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_pairwise.png',
-    #             filename_graph='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_pairwise.graphml')
-    #
-    # print('GD SNN')
-    # gd_snn(X=X,
-    #        labels=labels,
-    #        nr_neighbors=nr_neighbors,
-    #        filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_snn.png',
-    #        filename_graph='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_snn.graphml')
-    #
-    # print('GD KNN')
-    # gd_knn(X=X,
-    #        labels=labels,
-    #        nr_neighbors=nr_neighbors,
-    #        filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_knn.png',
-    #        filename_graph='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_knn.graphml')
+    print('MDS')
+    mds(X=X,
+        labels=labels,
+        filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_cmds.png')
+
+    print('GD Pairwise')
+    gd_pairwise(X=X,
+                labels=labels,
+                filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_pairwise.png',
+                filename_graph='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_pairwise.graphml')
+
+    print('GD SNN')
+    gd_snn(X=X,
+           labels=labels,
+           nr_neighbors=nr_neighbors,
+           filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_snn.png',
+           filename_graph='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_snn.graphml')
+
+    print('GD KNN')
+    gd_knn(X=X,
+           labels=labels,
+           nr_neighbors=nr_neighbors,
+           filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_knn.png',
+           filename_graph='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_knn.graphml')
 
     print('UMAP')
     umap(X=X,
@@ -128,12 +121,12 @@ def run_digits():
          filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_umap.png',
          filename_graph='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_umap.graphml')
 
-    # print('GD UMAP')
-    # gd_umap(X=X,
-    #         labels=labels,
-    #         nr_neighbors=nr_neighbors,
-    #         filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_umap.png',
-    #         filename_graph='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_umap.graphml')
+    print('GD UMAP')
+    gd_umap(X=X,
+            labels=labels,
+            nr_neighbors=nr_neighbors,
+            filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_umap.png',
+            filename_graph='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_umap.graphml')
 
     print('t-SNE')
     tsne(X=X,
@@ -143,13 +136,13 @@ def run_digits():
          filename_graph='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_tsne.graphml'
          )
 
-    # print('GD t-SNE')
-    # gd_tsne(X=X,
-    #         labels=labels,
-    #         perplexity=perplexity,
-    #         filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_tsne.png',
-    #         filename_graph='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_tsne.graphml'
-    #         )
+    print('GD t-SNE')
+    gd_tsne(X=X,
+            labels=labels,
+            perplexity=perplexity,
+            filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_tsne.png',
+            filename_graph='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_tsne.graphml'
+            )
 
 
 def draw_graphs():

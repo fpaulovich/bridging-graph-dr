@@ -1,21 +1,18 @@
-import numpy as np
+# Author: Fernando V. Paulovich -- <fpaulovich@gmail.com>
+#
+# Copyright (c) 2024 Fernando V. Paulovich
+# License: MIT
 
+import numpy as np
 from sklearn.manifold._t_sne import _joint_probabilities_nn
 from sklearn.manifold._t_sne import _joint_probabilities
-
 from sklearn.metrics.pairwise import pairwise_distances
-
 from sklearn.neighbors import NearestNeighbors
 from sklearn import preprocessing
 import sklearn.datasets as datasets
-
-
 from util import draw_graph, write_graphml
-
 import networkx as nx
-
 from sklearn.manifold import TSNE
-
 import matplotlib.pyplot as plt
 
 MACHINE_EPSILON = np.finfo(np.double).eps
@@ -206,19 +203,3 @@ def tsne(X, labels, filename_fig, filename_graph, perplexity=10):
 
     plt.savefig(filename_fig, dpi=400, bbox_inches='tight')
     plt.close()
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    raw = datasets.load_iris(as_frame=True)
-    X = raw.data.to_numpy()
-    X = preprocessing.MinMaxScaler().fit_transform(X)
-
-    lab = raw.target.to_numpy()
-    perplexity = 10
-
-    gd_tsne(X=X,
-            labels=lab,
-            perplexity=perplexity,
-            filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/iris_gd_tsne.png',
-            filename_graph='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/iris_gd_tsne.graphml')

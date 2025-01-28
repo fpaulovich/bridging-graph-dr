@@ -1,18 +1,13 @@
-import numpy as np
-
-from umap_gd import umap_graph
-from tsne_gd import tsne_bh_prob_graph, tsne_prob_graph
-from knn_gd import knn_graph
-
-from sklearn import preprocessing
-import sklearn.datasets as datasets
+# Author: Fernando V. Paulovich -- <fpaulovich@gmail.com>
+#
+# Copyright (c) 2024 Fernando V. Paulovich
+# License: MIT
 
 import networkx as nx
-import math
 import numpy as np
 
 import matplotlib.pyplot as plt
-from knn_gd import knn_graph
+from techniques.knn_gd import knn_graph
 
 
 def graph_color_clustering(filename_graph_topology, filename_graph_position, filename_fig):
@@ -104,47 +99,6 @@ def faithfulness_graph_topologies():
           len(nx.intersection(g_tsne, g_knn).edges) / len(nx.compose(g_tsne, g_knn).edges))
     print("jaccard index (umap, knn): ",
           len(nx.intersection(g_umap, g_knn).edges) / len(nx.compose(g_umap, g_knn).edges))
-
-    #
-    #
-    # print("symmetric difference (umap, tsne)",
-    #       len(nx.compose(nx.difference(g_umap, g_tsne), nx.difference(g_tsne, g_umap))))
-    # print("compose (umap, tsne)", len(nx.compose(g_umap, g_tsne).edges))
-    # print("umap - tsne", len(nx.difference(g_umap, g_tsne).edges) / len(g_umap.edges))
-    # print("tsne - umap", len(nx.difference(g_tsne, g_umap).edges) / len(g_tsne.edges))
-    #
-    # print("######")
-    #
-    # print("symmetric difference (umap, knn)", nx.compose(nx.difference(g_umap, g_knn), nx.difference(g_knn, g_umap)))
-    # print("compose (umap, knn)", len(nx.compose(g_umap, g_knn).edges))
-    # print("umap - knn", len(nx.difference(g_umap, g_knn).edges) / len(g_umap.edges))
-    # print("knn - umap", len(nx.difference(g_knn, g_umap).edges) / len(g_knn.edges))
-    #
-    # # symmetric difference
-    # sym_g = nx.compose(nx.difference(g_umap, g_tsne), nx.difference(g_tsne, g_umap))
-    #
-    # # print("######")
-    # #
-    # # print("umap, tsne", nx.graph_edit_distance(g_umap, g_tsne, timeout=60))
-    # # print("umap, knn", nx.graph_edit_distance(g_umap, g_knn, timeout=60))
-    # # print("tsne, umap", nx.graph_edit_distance(g_tsne, g_umap, timeout=60))
-    #
-    # pos = {}
-    # for n, data in g_umap.nodes.items():
-    #     pos[n] = (data['x'], data['y'])
-    #
-    # nx.draw(sym_g,
-    #         pos=pos,
-    #         with_labels=False,
-    #         node_color=list(map(int, nx.get_node_attributes(g_umap, 'label').values())),
-    #         cmap=plt.cm.tab10,
-    #         node_size=25,
-    #         edge_color='silver',
-    #         width=0.5)
-    #
-    # ax = plt.gca()  # to get the current axis
-    # ax.collections[0].set_edgecolor("#000000")
-    # plt.show()
 
 
 def run_1():
@@ -267,29 +221,29 @@ def faithfulness_layouts(filename_graph_position1, filename_graph_position2, nr_
 
 
 def run_faithfulness():
-    # print('faithfulness t-sne:',
-    #       faithfulness(
-    #           filename_graph_topology='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_tsne.graphml',
-    #           filename_graph_position='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_tsne.graphml',
-    #           nr_neighbors=10))
-    #
-    # print('faithfulness umap:',
-    #       faithfulness(
-    #           filename_graph_topology='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_umap.graphml',
-    #           filename_graph_position='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_umap.graphml',
-    #           nr_neighbors=10))
-    #
-    # print('faithfulness gd t-sne:',
-    #       faithfulness(
-    #           filename_graph_topology='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_tsne.graphml',
-    #           filename_graph_position='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_tsne.graphml',
-    #           nr_neighbors=10))
-    #
-    # print('faithfulness gd umap:',
-    #       faithfulness(
-    #           filename_graph_topology='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_umap.graphml',
-    #           filename_graph_position='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_umap.graphml',
-    #           nr_neighbors=10))
+    print('faithfulness t-sne:',
+          faithfulness(
+              filename_graph_topology='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_tsne.graphml',
+              filename_graph_position='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_tsne.graphml',
+              nr_neighbors=10))
+
+    print('faithfulness umap:',
+          faithfulness(
+              filename_graph_topology='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_umap.graphml',
+              filename_graph_position='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_umap.graphml',
+              nr_neighbors=10))
+
+    print('faithfulness gd t-sne:',
+          faithfulness(
+              filename_graph_topology='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_tsne.graphml',
+              filename_graph_position='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_tsne.graphml',
+              nr_neighbors=10))
+
+    print('faithfulness gd umap:',
+          faithfulness(
+              filename_graph_topology='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_umap.graphml',
+              filename_graph_position='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_umap.graphml',
+              nr_neighbors=10))
 
     print('faithfulness umap vs t-sne:',
           faithfulness_layouts(
@@ -297,11 +251,10 @@ def run_faithfulness():
               filename_graph_position2='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_tsne.graphml',
               nr_neighbors=10))
 
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     run_faithfulness()
-
     # graph_difference()
-
     # run_1()
     # run_2()

@@ -1,18 +1,17 @@
+# Author: Fernando V. Paulovich -- <fpaulovich@gmail.com>
+#
+# Copyright (c) 2024 Fernando V. Paulovich
+# License: MIT
+
 import math
-
 from sklearn.manifold import Isomap
-
 from util import draw_graph, write_graphml
-
 import matplotlib.pyplot as plt
-
 import numpy as np
 from sklearn import preprocessing
 import sklearn.datasets as datasets
 from sklearn.metrics import DistanceMetric
-
 import networkx as nx
-
 import heapq
 
 
@@ -132,26 +131,3 @@ def isomap(X, labels, filename_fig, nr_neighbors=10):
 
     plt.savefig(filename_fig, dpi=400, bbox_inches='tight')
     plt.close()
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    raw = datasets.load_digits(as_frame=True)
-    X = raw.data.to_numpy()
-    X = preprocessing.MinMaxScaler().fit_transform(X)
-
-    lab = raw.target.to_numpy()
-    n_neighbors = 10
-
-    print('ISOMAP')
-    isomap(X=X,
-           labels=lab,
-           nr_neighbors=n_neighbors,
-           filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_isomap.png')
-
-    print('GD ISOMAP')
-    gd_isomap(X=X,
-              labels=lab,
-              nr_neighbors=n_neighbors,
-              filename_fig='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_isomap.png',
-              filename_graph='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_isomap.graphml')

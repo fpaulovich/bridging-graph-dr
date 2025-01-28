@@ -1,13 +1,14 @@
-import math
+# Author: Fernando V. Paulovich -- <fpaulovich@gmail.com>
+#
+# Copyright (c) 2024 Fernando V. Paulovich
+# License: MIT
 
+import math
 import numpy as np
 from sklearn.metrics import DistanceMetric
 from sklearn.metrics import euclidean_distances
-
 from util import draw_graph, write_graphml
-
 import networkx as nx
-
 import matplotlib.pyplot as plt
 
 
@@ -139,9 +140,3 @@ def cmds(D, n_components=2):
     Y = V.dot(L)
 
     return Y[:, :n_components], evals[evals > 0]
-
-
-# Press the green button in the gutter to run the script.
-# if __name__ == '__main__':
-#     mds()
-#     gd_pairwise()

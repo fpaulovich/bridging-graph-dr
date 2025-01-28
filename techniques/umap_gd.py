@@ -1,9 +1,11 @@
+# Author: Fernando V. Paulovich -- <fpaulovich@gmail.com>
+#
+# Copyright (c) 2024 Fernando V. Paulovich
+# License: MIT
+
 from umap import UMAP
-
 from util import draw_graph, write_graphml
-
 import networkx as nx
-
 import matplotlib.pyplot as plt
 
 
@@ -86,9 +88,3 @@ def gd_umap(X, labels, filename_fig, filename_graph, nr_neighbors=10):
 
     pos = draw_graph(X, g, labels, filename_fig)
     write_graphml(g, pos, filename_graph)
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    umap()
-    gd_umap()
