@@ -8,8 +8,6 @@ from sklearn.manifold import Isomap
 from util import draw_graph, write_graphml
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn import preprocessing
-import sklearn.datasets as datasets
 from sklearn.metrics import DistanceMetric
 import networkx as nx
 import heapq

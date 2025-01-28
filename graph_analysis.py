@@ -221,34 +221,36 @@ def faithfulness_layouts(filename_graph_position1, filename_graph_position2, nr_
 
 
 def run_faithfulness():
+    dir_name = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/'
+
     print('faithfulness t-sne:',
           faithfulness(
-              filename_graph_topology='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_tsne.graphml',
-              filename_graph_position='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_tsne.graphml',
+              filename_graph_topology=dir_name + 'digits_gd_tsne.graphml',
+              filename_graph_position=dir_name + 'digits_tsne.graphml',
               nr_neighbors=10))
 
     print('faithfulness umap:',
           faithfulness(
-              filename_graph_topology='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_umap.graphml',
-              filename_graph_position='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_umap.graphml',
+              filename_graph_topology=dir_name + 'digits_gd_umap.graphml',
+              filename_graph_position=dir_name + 'digits_umap.graphml',
               nr_neighbors=10))
 
     print('faithfulness gd t-sne:',
           faithfulness(
-              filename_graph_topology='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_tsne.graphml',
-              filename_graph_position='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_tsne.graphml',
+              filename_graph_topology=dir_name + 'digits_gd_tsne.graphml',
+              filename_graph_position=dir_name + 'digits_gd_tsne.graphml',
               nr_neighbors=10))
 
     print('faithfulness gd umap:',
           faithfulness(
-              filename_graph_topology='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_umap.graphml',
-              filename_graph_position='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_gd_umap.graphml',
+              filename_graph_topology=dir_name + 'digits_gd_umap.graphml',
+              filename_graph_position=dir_name + 'digits_gd_umap.graphml',
               nr_neighbors=10))
 
     print('faithfulness umap vs t-sne:',
           faithfulness_layouts(
-              filename_graph_position1='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_umap.graphml',
-              filename_graph_position2='/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/digits_tsne.graphml',
+              filename_graph_position1=dir_name + 'digits_umap.graphml',
+              filename_graph_position2=dir_name + 'digits_tsne.graphml',
               nr_neighbors=10))
 
 

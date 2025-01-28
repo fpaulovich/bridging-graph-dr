@@ -8,8 +8,6 @@ from sklearn.manifold._t_sne import _joint_probabilities_nn
 from sklearn.manifold._t_sne import _joint_probabilities
 from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.neighbors import NearestNeighbors
-from sklearn import preprocessing
-import sklearn.datasets as datasets
 from util import draw_graph, write_graphml
 import networkx as nx
 from sklearn.manifold import TSNE
