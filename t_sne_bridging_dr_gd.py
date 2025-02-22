@@ -22,7 +22,6 @@ from scipy.stats import weightedtau
 from scipy.sparse import csr_matrix
 from scipy.spatial.distance import pdist
 
-
 MACHINE_EPSILON = np.finfo(np.double).eps
 
 
@@ -96,7 +95,7 @@ def draw_graph_by_tsne(X, g):
     #
     start = timer()
     y = TSNE(n_components=2,
-             perplexity=2,
+             perplexity=2,  # this is ignored
              metric='euclidean',
              random_state=42,
              method='barnes_hut',
@@ -108,7 +107,7 @@ def draw_graph_by_tsne(X, g):
     return y, label
 
 
-def remove_nodes_centrality(X, g, nodes_to_keep=0.8):
+def remove_nodes_centrality(X, g, perplexity, nodes_to_keep=0.8):
     ###################################
     # draw the graph using t-SNE
     #
@@ -160,11 +159,10 @@ def remove_nodes_centrality(X, g, nodes_to_keep=0.8):
     #
     # y_removed, _ = draw_graph_by_tsne(g)
     y_removed = TSNE(n_components=2,
-                     perplexity=50,
+                     perplexity=perplexity,
                      metric='euclidean',
                      random_state=42,
                      method='barnes_hut',
-                     # init='random'
                      init=PCA(n_components=2).fit_transform(X_removed)
                      ).fit_transform(X_removed)
     ###################################
@@ -226,13 +224,8 @@ def run_draw_all_graphs_by_tsne():
         y, label = draw_graph_by_tsne(g)
 
         plt.figure()
-        plt.scatter(y[:, 0], y[:, 1], c=label,
-                    cmap='Set1', edgecolors='face', linewidths=0.5, s=4)
-
-        if filename_fig is not None:
-            plt.savefig(filename_fig, dpi=400, bbox_inches='tight')
-        else:
-            plt.show()
+        plt.scatter(y[:, 0], y[:, 1], c=label, cmap='Set1', edgecolors='face', linewidths=0.5, s=4)
+        plt.savefig(filename_fig, dpi=400, bbox_inches='tight')
         plt.close()
 
     return
@@ -249,22 +242,30 @@ def run_calculate_metrics_original_techniques():
 
     for dataset in datasets:
         print('>>>processing:', dataset)
-        X, y = load_data(dir_base + dataset)
+        X, label = load_data(dir_base + dataset)
         X = MinMaxScaler().fit_transform(X)
-        # y = LabelEncoder().fit_transform(y)
+        label = LabelEncoder().fit_transform(label)
 
-        y_tsne = TSNE(n_components=2,
-                      perplexity=int(perplexity[dataset]),
-                      metric='euclidean',
-                      random_state=42,
-                      method='barnes_hut',
-                      init='random').fit_transform(X)
+        y = TSNE(n_components=2,
+                 perplexity=int(perplexity[dataset]),
+                 metric='euclidean',
+                 random_state=42,
+                 method='barnes_hut',
+                 init=PCA(n_components=2).fit_transform(X)
+                 ).fit_transform(X)
 
-        trust = trustworthiness(X, y_tsne, n_neighbors=int(perplexity[dataset]))
-        print('trustworthiness: ', trust)
-
-        sort = sortedness(X, y_tsne, f=weightedtau)
-        print('sortedness:', np.average(sort))
+        dr_metric = sortedness(X, y, f=weightedtau)
+        print('sortedness:', np.average(dr_metric))
+        dr_metric = trustworthiness(X, y, n_neighbors=7)
+        print('trustworthiness:', dr_metric)
+        dr_metric = stress(X, y, metric='euclidean')
+        print('stress:', dr_metric)
+        dr_metric = silhouette_score(y, label)
+        print('silhouette_score:', dr_metric)
+        dr_metric = neighborhood_preservation(X, y, nr_neighbors=7)
+        print('neighborhood_preservation:', dr_metric)
+        dr_metric = neighborhood_hit(y, label, nr_neighbors=7)
+        print('neighborhood_hit:', dr_metric)
 
     return
 
@@ -275,6 +276,8 @@ def run_remove_nodes_centrality():
 
     dir_base = '/Users/fpaulovich/Documents/data/'
     dataset = 'fashion_mnist'
+
+    perplexity = 50
 
     percentages = [0.95, 0.90, 0.85, 0.80, 0.75, 0.7]
 
@@ -292,7 +295,7 @@ def run_remove_nodes_centrality():
         g = nx.read_graphml(filename_graph)
 
         # remove nodes by centrality
-        y_removed, label_removed = remove_nodes_centrality(X, g, nodes_to_keep=percentage)
+        y_removed, label_removed = remove_nodes_centrality(X, g, perplexity, nodes_to_keep=percentage)
 
         # save image
         filename_fig_reduced = dir_base_graph + 'reduced/' + dataset + '[' + str(percentage) + ']-reduced_tsne.png'
@@ -312,6 +315,10 @@ def run_remove_nodes_centrality_batch():
 
     datasets = ['bank', 'cifar10', 'cnae9', 'coil20', 'fashion_mnist', 'fmd', 'har', 'hatespeech',
                 'hiva', 'imdb', 'orl', 'secom', 'seismic', 'sentiment', 'sms', 'spambase', 'svhn']
+
+    perplexity = {'bank': 30, 'cifar10': 15, 'cnae9': 5, 'coil20': 50, 'epileptic': 50, 'fashion_mnist': 50,
+                  'fmd': 50, 'har': 30, 'hatespeech': 30, 'hiva': 50, 'imdb': 50, 'orl': 15, 'secom': 30, 'seismic': 50,
+                  'sentiment': 15, 'sms': 50, 'spambase': 5, 'svhn': 15}
 
     percentages = [0.95, 0.90, 0.85, 0.80, 0.75, 0.7]
 
@@ -335,7 +342,7 @@ def run_remove_nodes_centrality_batch():
             g = nx.read_graphml(filename_graph)
 
             # remove nodes by centrality
-            y_removed, label_removed = remove_nodes_centrality(X, g, nodes_to_keep=percentage)
+            y_removed, label_removed = remove_nodes_centrality(X, g, perplexity[dataset], nodes_to_keep=percentage)
 
             # save image
             filename_fig_reduced = dir_base_graph + 'reduced/' + dataset + '[' + str(percentage) + ']-reduced_tsne.png'
