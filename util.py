@@ -11,10 +11,11 @@ import math
 
 
 def write_graphml(g, pos, filename):
-    for node, (x, y) in pos.items():
-        g.nodes[node]['x'] = float(x)
-        g.nodes[node]['y'] = float(y)
-    nx.write_graphml(g, filename, named_key_ids=True)
+    if filename is not None:
+        for node, (x, y) in pos.items():
+            g.nodes[node]['x'] = float(x)
+            g.nodes[node]['y'] = float(y)
+        nx.write_graphml(g, filename, named_key_ids=True)
 
 
 def init(X):
@@ -28,7 +29,7 @@ def init(X):
     return pos
 
 
-def draw_graph(X, g, labels, filename):
+def draw_graph(X, g, labels, filename=None):
     init_pos = init(X)
     size = len(X)
 
@@ -45,7 +46,7 @@ def draw_graph(X, g, labels, filename):
                                          pos=init_pos,
                                          weight='weight',
                                          seed=1,
-                                         iterations=1000,
+                                         iterations=100,
                                          k=1 / math.sqrt(size))
 
     plt.figure(figsize=(6, 5))
@@ -66,7 +67,10 @@ def draw_graph(X, g, labels, filename):
                     labelleft=False,
                     labelbottom=False)
 
-    plt.savefig(filename, dpi=400, bbox_inches='tight')
+    if filename is not None:
+        plt.savefig(filename, dpi=400, bbox_inches='tight')
+    else:
+        plt.show()
     plt.close()
 
     return pos

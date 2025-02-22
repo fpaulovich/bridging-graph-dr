@@ -161,6 +161,8 @@ def gd_tsne(X, labels, filename_fig, filename_graph, perplexity=10):
     pos = draw_graph(X, g, labels, filename_fig)
     write_graphml(g, pos, filename_graph)
 
+    return g
+
 
 def tsne(X, labels, filename_fig, filename_graph, perplexity=10):
     size = len(X)
@@ -199,5 +201,6 @@ def tsne(X, labels, filename_fig, filename_graph, perplexity=10):
                     labelleft=False,
                     labelbottom=False)
 
-    plt.savefig(filename_fig, dpi=400, bbox_inches='tight')
+    if filename_fig is not None:
+        plt.savefig(filename_fig, dpi=400, bbox_inches='tight')
     plt.close()

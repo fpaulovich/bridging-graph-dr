@@ -93,59 +93,59 @@ def run_digits():
 
     dir_name = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/'
 
-    print('MDS')
-    mds(X=X,
-        labels=labels,
-        filename_fig=dir_name + 'digits_cmds.png')
-
-    print('GD Pairwise')
-    gd_pairwise(X=X,
-                labels=labels,
-                filename_fig=dir_name + 'digits_gd_pairwise.png',
-                filename_graph=dir_name + 'digits_gd_pairwise.graphml')
-
-    print('GD SNN')
-    gd_snn(X=X,
-           labels=labels,
-           nr_neighbors=nr_neighbors,
-           filename_fig=dir_name + 'digits_gd_snn.png',
-           filename_graph=dir_name + 'digits_gd_snn.graphml')
-
-    print('GD KNN')
-    gd_knn(X=X,
-           labels=labels,
-           nr_neighbors=nr_neighbors,
-           filename_fig=dir_name + 'digits_gd_knn.png',
-           filename_graph=dir_name + 'digits_gd_knn.graphml')
-
-    print('UMAP')
-    umap(X=X,
-         labels=labels,
-         nr_neighbors=nr_neighbors,
-         filename_fig=dir_name + 'digits_umap.png',
-         filename_graph=dir_name + 'digits_umap.graphml')
-
-    print('GD UMAP')
-    gd_umap(X=X,
-            labels=labels,
-            nr_neighbors=nr_neighbors,
-            filename_fig=dir_name + 'digits_gd_umap.png',
-            filename_graph=dir_name + 'digits_gd_umap.graphml')
-
-    print('t-SNE')
-    tsne(X=X,
-         labels=labels,
-         perplexity=perplexity,
-         filename_fig=dir_name + 'digits_tsne.png',
-         filename_graph=dir_name + 'digits_tsne.graphml'
-         )
+    # print('MDS')
+    # mds(X=X,
+    #     labels=labels,
+    #     filename_fig=dir_name + 'digits_cmds.png')
+    #
+    # print('GD Pairwise')
+    # gd_pairwise(X=X,
+    #             labels=labels,
+    #             filename_fig=dir_name + 'digits_gd_pairwise.png',
+    #             filename_graph=dir_name + 'digits_gd_pairwise.graphml')
+    #
+    # print('GD SNN')
+    # gd_snn(X=X,
+    #        labels=labels,
+    #        nr_neighbors=nr_neighbors,
+    #        filename_fig=dir_name + 'digits_gd_snn.png',
+    #        filename_graph=dir_name + 'digits_gd_snn.graphml')
+    #
+    # print('GD KNN')
+    # gd_knn(X=X,
+    #        labels=labels,
+    #        nr_neighbors=nr_neighbors,
+    #        filename_fig=dir_name + 'digits_gd_knn.png',
+    #        filename_graph=dir_name + 'digits_gd_knn.graphml')
+    #
+    # print('UMAP')
+    # umap(X=X,
+    #      labels=labels,
+    #      nr_neighbors=nr_neighbors,
+    #      filename_fig=dir_name + 'digits_umap.png',
+    #      filename_graph=dir_name + 'digits_umap.graphml')
+    #
+    # print('GD UMAP')
+    # gd_umap(X=X,
+    #         labels=labels,
+    #         nr_neighbors=nr_neighbors,
+    #         filename_fig=dir_name + 'digits_gd_umap.png',
+    #         filename_graph=dir_name + 'digits_gd_umap.graphml')
+    #
+    # print('t-SNE')
+    # tsne(X=X,
+    #      labels=labels,
+    #      perplexity=perplexity,
+    #      filename_fig=dir_name + 'digits_tsne.png',
+    #      filename_graph=dir_name + 'digits_tsne.graphml'
+    #      )
 
     print('GD t-SNE')
     gd_tsne(X=X,
             labels=labels,
             perplexity=perplexity,
-            filename_fig=dir_name + 'digits_gd_tsne.png',
-            filename_graph=dir_name + 'digits_gd_tsne.graphml'
+            filename_fig=dir_name + 'digits_gd_tsne[30].png',
+            filename_graph=dir_name + 'digits_gd_tsne[30].graphml'
             )
 
 
@@ -195,5 +195,5 @@ def draw_graphs():
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     # run_wine()
-    # run_digits()
-    draw_graphs()
+    run_digits()
+    # draw_graphs()
