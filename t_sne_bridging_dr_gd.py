@@ -270,32 +270,38 @@ def run_calculate_metrics_original_techniques():
 
 
 def run_remove_nodes_centrality():
-    # raw = datasets.load_digits(as_frame=True)
-    # X = raw.data.to_numpy()
-    # X = preprocessing.MinMaxScaler().fit_transform(X)
-    #
-    # dir_base_graph = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/'
-    # filename_graph = dir_base_graph + 'digits_gd_tsne.graphml'
-    # g = nx.read_graphml(filename_graph)
-
     dir_base_graph = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/survey_dr/tsne/'
     filename_graph = dir_base_graph + 'fashion_mnist-tsne.graphml'
-    g = nx.read_graphml(filename_graph)
 
     dir_base = '/Users/fpaulovich/Documents/data/'
     dataset = 'fashion_mnist'
-    X, _ = load_data(dir_base + dataset)
-    X = MinMaxScaler().fit_transform(X)
 
-    # remove nodes
-    y_removed, label_removed = remove_nodes_centrality(X, g, nodes_to_keep=0.8)
+    percentages = [0.95, 0.90, 0.85, 0.80, 0.75, 0.7]
 
-    plt.figure()
-    plt.scatter(y_removed[:, 0], y_removed[:, 1], c=label_removed, cmap='Set1', edgecolors='face',
-                linewidths=0.5, s=4)
-    # plt.savefig(filename_fig_reduced, dpi=400, bbox_inches='tight')
-    plt.show()
-    plt.close()
+    for percentage in percentages:
+        print('--')
+        print('--')
+        print('--')
+        print('>> percentage: ', percentage)
+
+        # read the dataset
+        X, _ = load_data(dir_base + dataset)
+        X = MinMaxScaler().fit_transform(X)
+
+        # read the graph
+        g = nx.read_graphml(filename_graph)
+
+        # remove nodes by centrality
+        y_removed, label_removed = remove_nodes_centrality(X, g, nodes_to_keep=percentage)
+
+        # save image
+        filename_fig_reduced = dir_base_graph + 'reduced/' + dataset + '[' + str(percentage) + ']-reduced_tsne.png'
+
+        plt.figure()
+        plt.scatter(y_removed[:, 0], y_removed[:, 1], c=label_removed, cmap='Set1', edgecolors='face',
+                    linewidths=0.5, s=4)
+        plt.savefig(filename_fig_reduced, dpi=400, bbox_inches='tight')
+        plt.close()
 
     return
 
@@ -331,6 +337,7 @@ def run_remove_nodes_centrality_batch():
             # remove nodes by centrality
             y_removed, label_removed = remove_nodes_centrality(X, g, nodes_to_keep=percentage)
 
+            # save image
             filename_fig_reduced = dir_base_graph + 'reduced/' + dataset + '[' + str(percentage) + ']-reduced_tsne.png'
 
             plt.figure()
@@ -343,4 +350,5 @@ def run_remove_nodes_centrality_batch():
 
 
 if __name__ == '__main__':
-    run_remove_nodes_centrality_batch()
+    run_remove_nodes_centrality()
+    # run_remove_nodes_centrality_batch()
