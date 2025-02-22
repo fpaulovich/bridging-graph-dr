@@ -22,6 +22,9 @@ from scipy.stats import weightedtau
 from scipy.sparse import csr_matrix
 from scipy.spatial.distance import pdist
 
+import pandas as pd
+import random
+
 MACHINE_EPSILON = np.finfo(np.double).eps
 
 
@@ -107,30 +110,7 @@ def draw_graph_by_tsne(X, g):
     return y, label
 
 
-def remove_nodes_centrality(X, g, perplexity, nodes_to_keep=0.8):
-    ###################################
-    # draw the graph using t-SNE
-    #
-    y, label = draw_graph_by_tsne(X, g)
-    ###################################
-
-    ###################################
-    # calculate metrics original
-    #
-    dr_metric = sortedness(X, y, f=weightedtau)
-    print('sortedness before:', np.average(dr_metric))
-    dr_metric = trustworthiness(X, y, n_neighbors=7)
-    print('trustworthiness before:', dr_metric)
-    dr_metric = stress(X, y, metric='euclidean')
-    print('stress before:', dr_metric)
-    dr_metric = silhouette_score(y, label)
-    print('silhouette_score before:', dr_metric)
-    dr_metric = neighborhood_preservation(X, y, nr_neighbors=7)
-    print('neighborhood_preservation before:', dr_metric)
-    dr_metric = neighborhood_hit(y, label, nr_neighbors=7)
-    print('neighborhood_hit before:', dr_metric)
-    print('---')
-
+def remove_nodes_centrality(X, label, g, perplexity, nodes_to_keep=0.8):
     ###################################
     # creating the indexes to remove
     #
@@ -170,20 +150,37 @@ def remove_nodes_centrality(X, g, perplexity, nodes_to_keep=0.8):
     ###################################
     # calculate metrics reduced
     #
-    dr_metric = sortedness(X_removed, y_removed, f=weightedtau)
+    metrics = {}
+
+    dr_metric = sortedness(X_removed, y_removed)
     print('sortedness after:', np.average(dr_metric))
+    metrics.update({'sortedness': np.average(dr_metric)})
+
+    dr_metric = sortedness(X_removed, y_removed, f=weightedtau)
+    print('sortedness after (weightedtau):', np.average(dr_metric))
+    metrics.update({'sortedness_weightedtau': np.average(dr_metric)})
+
     dr_metric = trustworthiness(X_removed, y_removed, n_neighbors=7)
     print('trustworthiness after:', dr_metric)
+    metrics.update({'trustworthiness': np.average(dr_metric)})
     dr_metric = stress(X_removed, y_removed, metric='euclidean')
+
     print('stress after:', dr_metric)
+    metrics.update({'stress': np.average(dr_metric)})
     dr_metric = silhouette_score(y_removed, label_removed)
+
     print('silhouette_score after:', dr_metric)
+    metrics.update({'silhouette_score': np.average(dr_metric)})
     dr_metric = neighborhood_preservation(X_removed, y_removed, nr_neighbors=7)
+
     print('neighborhood_preservation after:', dr_metric)
+    metrics.update({'neighborhood_preservation': np.average(dr_metric)})
+
     dr_metric = neighborhood_hit(y_removed, label_removed, nr_neighbors=7)
     print('neighborhood_hit after:', dr_metric)
+    metrics.update({'neighborhood_hit': np.average(dr_metric)})
 
-    return y_removed, label_removed
+    return y_removed, label_removed, metrics
 
 
 def run_generate_all_tsne_graphs():
@@ -254,8 +251,10 @@ def run_calculate_metrics_original_techniques():
                  init=PCA(n_components=2).fit_transform(X)
                  ).fit_transform(X)
 
-        dr_metric = sortedness(X, y, f=weightedtau)
+        dr_metric = sortedness(X, y)
         print('sortedness:', np.average(dr_metric))
+        dr_metric = sortedness(X, y, f=weightedtau)
+        print('sortedness (weightedtau):', np.average(dr_metric))
         dr_metric = trustworthiness(X, y, n_neighbors=7)
         print('trustworthiness:', dr_metric)
         dr_metric = stress(X, y, metric='euclidean')
@@ -279,23 +278,87 @@ def run_remove_nodes_centrality():
 
     perplexity = 50
 
-    percentages = [0.95, 0.90, 0.85, 0.80, 0.75, 0.7]
+    percentages = [0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60]
+
+    metrics_df = pd.DataFrame(columns=['percentage',
+                                       'sortedness',
+                                       'sortedness_weightedtau',
+                                       'trustworthiness',
+                                       'stress',
+                                       'silhouette_score',
+                                       'neighborhood_preservation',
+                                       'neighborhood_hit'])
+
+    # read the dataset
+    X, _ = load_data(dir_base + dataset)
+    X = MinMaxScaler().fit_transform(X)
+
+    # read the graph
+    g = nx.read_graphml(filename_graph)
+
+    # draw the graph using t-SNE
+    y, label = draw_graph_by_tsne(X, g)
+
+    # calculate metrics for the original
+    print('---')
+    print('>>>original')
+    metrics = {}
+
+    dr_metric = sortedness(X, y)
+    print('sortedness after:', np.average(dr_metric))
+    metrics.update({'sortedness': np.average(dr_metric)})
+
+    dr_metric = sortedness(X, y, f=weightedtau)
+    print('sortedness after (weightedtau):', np.average(dr_metric))
+    metrics.update({'sortedness_weightedtau': np.average(dr_metric)})
+
+    dr_metric = trustworthiness(X, y, n_neighbors=7)
+    print('trustworthiness after:', dr_metric)
+    metrics.update({'trustworthiness': np.average(dr_metric)})
+    dr_metric = stress(X, y, metric='euclidean')
+
+    print('stress after:', dr_metric)
+    metrics.update({'stress': np.average(dr_metric)})
+    dr_metric = silhouette_score(y, label)
+
+    print('silhouette_score after:', dr_metric)
+    metrics.update({'silhouette_score': np.average(dr_metric)})
+    dr_metric = neighborhood_preservation(X, y, nr_neighbors=7)
+
+    print('neighborhood_preservation after:', dr_metric)
+    metrics.update({'neighborhood_preservation': np.average(dr_metric)})
+
+    dr_metric = neighborhood_hit(y, label, nr_neighbors=7)
+    print('neighborhood_hit after:', dr_metric)
+    metrics.update({'neighborhood_hit': np.average(dr_metric)})
+
+    metrics_df.loc[len(metrics_df)] = [1.00,
+                                       metrics['sortedness'],
+                                       metrics['sortedness_weightedtau'],
+                                       metrics['trustworthiness'],
+                                       metrics['stress'],
+                                       metrics['silhouette_score'],
+                                       metrics['neighborhood_preservation'],
+                                       metrics['neighborhood_hit']]
 
     for percentage in percentages:
         print('--')
-        print('--')
-        print('--')
         print('>> percentage: ', percentage)
-
-        # read the dataset
-        X, _ = load_data(dir_base + dataset)
-        X = MinMaxScaler().fit_transform(X)
 
         # read the graph
         g = nx.read_graphml(filename_graph)
 
         # remove nodes by centrality
-        y_removed, label_removed = remove_nodes_centrality(X, g, perplexity, nodes_to_keep=percentage)
+        y_removed, label_removed, metrics = remove_nodes_centrality(X, label, g, perplexity, nodes_to_keep=percentage)
+
+        metrics_df.loc[len(metrics_df)] = [percentage,
+                                           metrics['sortedness'],
+                                           metrics['sortedness_weightedtau'],
+                                           metrics['trustworthiness'],
+                                           metrics['stress'],
+                                           metrics['silhouette_score'],
+                                           metrics['neighborhood_preservation'],
+                                           metrics['neighborhood_hit']]
 
         # save image
         filename_fig_reduced = dir_base_graph + 'reduced/' + dataset + '[' + str(percentage) + ']-reduced_tsne.png'
@@ -306,6 +369,9 @@ def run_remove_nodes_centrality():
         plt.savefig(filename_fig_reduced, dpi=400, bbox_inches='tight')
         plt.close()
 
+    # save CSV
+    metrics_df.to_csv(dir_base_graph + dataset + '-metrics.csv', sep=',')
+
     return
 
 
@@ -313,36 +379,102 @@ def run_remove_nodes_centrality_batch():
     dir_base_dataset = '/Users/fpaulovich/Documents/data/'
     dir_base_graph = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/survey_dr/tsne/'
 
-    datasets = ['bank', 'cifar10', 'cnae9', 'coil20', 'fashion_mnist', 'fmd', 'har', 'hatespeech',
-                'hiva', 'imdb', 'orl', 'secom', 'seismic', 'sentiment', 'sms', 'spambase', 'svhn']
+    datasets = ['bank', 'cifar10', 'cnae9', 'coil20', 'epileptic', 'fashion_mnist', 'fmd', 'har', 'hatespeech',
+                'hiva', 'imdb', 'secom', 'seismic', 'sentiment', 'sms', 'spambase', 'svhn']
 
     perplexity = {'bank': 30, 'cifar10': 15, 'cnae9': 5, 'coil20': 50, 'epileptic': 50, 'fashion_mnist': 50,
                   'fmd': 50, 'har': 30, 'hatespeech': 30, 'hiva': 50, 'imdb': 50, 'orl': 15, 'secom': 30, 'seismic': 50,
                   'sentiment': 15, 'sms': 50, 'spambase': 5, 'svhn': 15}
 
-    percentages = [0.95, 0.90, 0.85, 0.80, 0.75, 0.7]
+    percentages = [0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60]
 
-    for percentage in percentages:
+    for dataset in datasets:
         print('--')
         print('--')
+        print('>>>processing:', dataset)
         print('--')
-        print('>> percentage: ', percentage)
 
-        for dataset in datasets:
-            print('--')
-            print('--')
-            print('>>>processing:', dataset)
+        metrics_df = pd.DataFrame(columns=['percentage',
+                                           'sortedness',
+                                           'sortedness_weightedtau',
+                                           'trustworthiness',
+                                           'stress',
+                                           'silhouette_score',
+                                           'neighborhood_preservation',
+                                           'neighborhood_hit'])
 
-            # read the dataset
-            X, _ = load_data(dir_base_dataset + dataset)
-            X = MinMaxScaler().fit_transform(X)
+        # read the dataset
+        X, _ = load_data(dir_base_dataset + dataset)
+        X = MinMaxScaler().fit_transform(X)
+
+        # read the graph
+        filename_graph = dir_base_graph + dataset + '-tsne.graphml'
+        g = nx.read_graphml(filename_graph)
+
+        # draw the graph using t-SNE
+        y, label = draw_graph_by_tsne(X, g)
+
+        # calculate metrics for the original
+        print('---')
+        print('>>>original')
+        metrics = {}
+
+        dr_metric = sortedness(X, y)
+        print('sortedness after:', np.average(dr_metric))
+        metrics.update({'sortedness': np.average(dr_metric)})
+
+        dr_metric = sortedness(X, y, f=weightedtau)
+        print('sortedness after (weightedtau):', np.average(dr_metric))
+        metrics.update({'sortedness_weightedtau': np.average(dr_metric)})
+
+        dr_metric = trustworthiness(X, y, n_neighbors=7)
+        print('trustworthiness after:', dr_metric)
+        metrics.update({'trustworthiness': np.average(dr_metric)})
+        dr_metric = stress(X, y, metric='euclidean')
+
+        print('stress after:', dr_metric)
+        metrics.update({'stress': np.average(dr_metric)})
+        dr_metric = silhouette_score(y, label)
+
+        print('silhouette_score after:', dr_metric)
+        metrics.update({'silhouette_score': np.average(dr_metric)})
+        dr_metric = neighborhood_preservation(X, y, nr_neighbors=7)
+
+        print('neighborhood_preservation after:', dr_metric)
+        metrics.update({'neighborhood_preservation': np.average(dr_metric)})
+
+        dr_metric = neighborhood_hit(y, label, nr_neighbors=7)
+        print('neighborhood_hit after:', dr_metric)
+        metrics.update({'neighborhood_hit': np.average(dr_metric)})
+
+        metrics_df.loc[len(metrics_df)] = [1.00,
+                                           metrics['sortedness'],
+                                           metrics['sortedness_weightedtau'],
+                                           metrics['trustworthiness'],
+                                           metrics['stress'],
+                                           metrics['silhouette_score'],
+                                           metrics['neighborhood_preservation'],
+                                           metrics['neighborhood_hit']]
+
+        for percentage in percentages:
+            print('>> percentage: ', percentage)
 
             # read the graph
             filename_graph = dir_base_graph + dataset + '-tsne.graphml'
             g = nx.read_graphml(filename_graph)
 
             # remove nodes by centrality
-            y_removed, label_removed = remove_nodes_centrality(X, g, perplexity[dataset], nodes_to_keep=percentage)
+            y_removed, label_removed, metrics = remove_nodes_centrality(X, label, g, int(perplexity[dataset]),
+                                                                        nodes_to_keep=percentage)
+
+            metrics_df.loc[len(metrics_df)] = [percentage,
+                                               metrics['sortedness'],
+                                               metrics['sortedness_weightedtau'],
+                                               metrics['trustworthiness'],
+                                               metrics['stress'],
+                                               metrics['silhouette_score'],
+                                               metrics['neighborhood_preservation'],
+                                               metrics['neighborhood_hit']]
 
             # save image
             filename_fig_reduced = dir_base_graph + 'reduced/' + dataset + '[' + str(percentage) + ']-reduced_tsne.png'
@@ -353,9 +485,222 @@ def run_remove_nodes_centrality_batch():
             plt.savefig(filename_fig_reduced, dpi=400, bbox_inches='tight')
             plt.close()
 
+        filename_metrics = dir_base_graph + 'reduced/' + dataset + '-metrics.csv'
+        metrics_df.to_csv(filename_metrics, sep=',')
+
     return
 
 
+def remove_nodes_random(X, label, g, perplexity, nodes_to_keep=0.8):
+    ###################################
+    # creating the indexes to remove
+    #
+    number_nodes = g.number_of_nodes()
+    number_nodes_to_remove = int(number_nodes * (1-nodes_to_keep))
+    to_remove = random.sample(range(len(X)), number_nodes_to_remove)
+    ###################################
+
+    ###################################
+    # remove instances
+    #
+    X_removed = np.delete(X, to_remove, axis=0)
+    label_removed = np.delete(label, to_remove, axis=0)
+    ###################################
+
+    ###################################
+    # project reduced
+    #
+    # y_removed, _ = draw_graph_by_tsne(g)
+    y_removed = TSNE(n_components=2,
+                     perplexity=perplexity,
+                     metric='euclidean',
+                     random_state=42,
+                     method='barnes_hut',
+                     init=PCA(n_components=2).fit_transform(X_removed)
+                     ).fit_transform(X_removed)
+    ###################################
+
+    ###################################
+    # calculate metrics reduced
+    #
+    metrics = {}
+
+    dr_metric = sortedness(X_removed, y_removed)
+    print('sortedness after:', np.average(dr_metric))
+    metrics.update({'sortedness': np.average(dr_metric)})
+
+    dr_metric = sortedness(X_removed, y_removed, f=weightedtau)
+    print('sortedness after (weightedtau):', np.average(dr_metric))
+    metrics.update({'sortedness_weightedtau': np.average(dr_metric)})
+
+    dr_metric = trustworthiness(X_removed, y_removed, n_neighbors=7)
+    print('trustworthiness after:', dr_metric)
+    metrics.update({'trustworthiness': np.average(dr_metric)})
+    dr_metric = stress(X_removed, y_removed, metric='euclidean')
+
+    print('stress after:', dr_metric)
+    metrics.update({'stress': np.average(dr_metric)})
+    dr_metric = silhouette_score(y_removed, label_removed)
+
+    print('silhouette_score after:', dr_metric)
+    metrics.update({'silhouette_score': np.average(dr_metric)})
+    dr_metric = neighborhood_preservation(X_removed, y_removed, nr_neighbors=7)
+
+    print('neighborhood_preservation after:', dr_metric)
+    metrics.update({'neighborhood_preservation': np.average(dr_metric)})
+
+    dr_metric = neighborhood_hit(y_removed, label_removed, nr_neighbors=7)
+    print('neighborhood_hit after:', dr_metric)
+    metrics.update({'neighborhood_hit': np.average(dr_metric)})
+
+    return y_removed, label_removed, metrics
+
+
+def run_remove_nodes_random_batch():
+    dir_base_dataset = '/Users/fpaulovich/Documents/data/'
+    dir_base_graph = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/survey_dr/tsne/'
+
+    datasets = ['cnae9', 'coil20', 'fashion_mnist', 'har', 'spambase']
+
+    perplexity = {'bank': 30, 'cifar10': 15, 'cnae9': 5, 'coil20': 50, 'epileptic': 50, 'fashion_mnist': 50,
+                  'fmd': 50, 'har': 30, 'hatespeech': 30, 'hiva': 50, 'imdb': 50, 'orl': 15, 'secom': 30, 'seismic': 50,
+                  'sentiment': 15, 'sms': 50, 'spambase': 5, 'svhn': 15}
+
+    percentages = [0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60]
+
+    for dataset in datasets:
+        print('--')
+        print('--')
+        print('>>>processing:', dataset)
+        print('--')
+
+        metrics_df = pd.DataFrame(columns=['percentage',
+                                           'sortedness',
+                                           'sortedness_weightedtau',
+                                           'trustworthiness',
+                                           'stress',
+                                           'silhouette_score',
+                                           'neighborhood_preservation',
+                                           'neighborhood_hit'])
+
+        # read the dataset
+        X, _ = load_data(dir_base_dataset + dataset)
+        X = MinMaxScaler().fit_transform(X)
+
+        # read the graph
+        filename_graph = dir_base_graph + dataset + '-tsne.graphml'
+        g = nx.read_graphml(filename_graph)
+
+        # draw the graph using t-SNE
+        y, label = draw_graph_by_tsne(X, g)
+
+        # calculate metrics for the original
+        print('---')
+        print('>>>original')
+        metrics = {}
+
+        dr_metric = sortedness(X, y)
+        print('sortedness after:', np.average(dr_metric))
+        metrics.update({'sortedness': np.average(dr_metric)})
+
+        dr_metric = sortedness(X, y, f=weightedtau)
+        print('sortedness after (weightedtau):', np.average(dr_metric))
+        metrics.update({'sortedness_weightedtau': np.average(dr_metric)})
+
+        dr_metric = trustworthiness(X, y, n_neighbors=7)
+        print('trustworthiness after:', dr_metric)
+        metrics.update({'trustworthiness': np.average(dr_metric)})
+        dr_metric = stress(X, y, metric='euclidean')
+
+        print('stress after:', dr_metric)
+        metrics.update({'stress': np.average(dr_metric)})
+        dr_metric = silhouette_score(y, label)
+
+        print('silhouette_score after:', dr_metric)
+        metrics.update({'silhouette_score': np.average(dr_metric)})
+        dr_metric = neighborhood_preservation(X, y, nr_neighbors=7)
+
+        print('neighborhood_preservation after:', dr_metric)
+        metrics.update({'neighborhood_preservation': np.average(dr_metric)})
+
+        dr_metric = neighborhood_hit(y, label, nr_neighbors=7)
+        print('neighborhood_hit after:', dr_metric)
+        metrics.update({'neighborhood_hit': np.average(dr_metric)})
+
+        metrics_df.loc[len(metrics_df)] = [1.00,
+                                           metrics['sortedness'],
+                                           metrics['sortedness_weightedtau'],
+                                           metrics['trustworthiness'],
+                                           metrics['stress'],
+                                           metrics['silhouette_score'],
+                                           metrics['neighborhood_preservation'],
+                                           metrics['neighborhood_hit']]
+
+        for percentage in percentages:
+            print('>> percentage: ', percentage)
+
+            # read the graph
+            filename_graph = dir_base_graph + dataset + '-tsne.graphml'
+            g = nx.read_graphml(filename_graph)
+
+            # remove nodes randomly
+            y_removed, label_removed, metrics = remove_nodes_random(X, label, g, int(perplexity[dataset]),
+                                                                    nodes_to_keep=percentage)
+
+            metrics_df.loc[len(metrics_df)] = [percentage,
+                                               metrics['sortedness'],
+                                               metrics['sortedness_weightedtau'],
+                                               metrics['trustworthiness'],
+                                               metrics['stress'],
+                                               metrics['silhouette_score'],
+                                               metrics['neighborhood_preservation'],
+                                               metrics['neighborhood_hit']]
+
+            # save image
+            filename_fig_reduced = dir_base_graph + 'reduced_random/' + dataset + '[' + str(percentage) + ']-reduced_tsne.png'
+
+            plt.figure()
+            plt.scatter(y_removed[:, 0], y_removed[:, 1], c=label_removed, cmap='Set1', edgecolors='face',
+                        linewidths=0.5, s=4)
+            plt.savefig(filename_fig_reduced, dpi=400, bbox_inches='tight')
+            plt.close()
+
+        filename_metrics = dir_base_graph + 'reduced_random/' + dataset + '-metrics.csv'
+        metrics_df.to_csv(filename_metrics, sep=',')
+
+    return
+
+
+def draw_line_graph():
+    # datasets = ['bank', 'cifar10', 'cnae9', 'coil20', 'epileptic', 'fashion_mnist', 'fmd', 'har', 'hatespeech',
+    #             'hiva', 'imdb', 'secom', 'seismic', 'sentiment', 'sms', 'spambase', 'svhn']
+
+    metrics = ['sortedness', 'sortedness_weightedtau', 'trustworthiness', 'stress',
+               'silhouette_score', 'neighborhood_preservation', 'neighborhood_hit']
+
+    datasets = ['fashion_mnist']  # ['cnae9', 'coil20', 'fashion_mnist', 'har', 'spambase']
+
+    dir_base_graph = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/survey_dr/tsne/'
+
+    plt.figure()
+    for metric in metrics:
+        for dataset in datasets:
+            filename_metrics = dir_base_graph + 'reduced_random/' + dataset + '-metrics.csv'
+            df_metrics = pd.read_csv(filename_metrics, sep=',')
+            plt.plot(df_metrics['percentage'], df_metrics[metric], label=dataset)
+
+        plt.xlabel('percentage')
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        plt.ylabel(metric)
+        plt.gca().invert_xaxis()
+
+        filename_fig = dir_base_graph + 'reduced_random/metric_' + metric + '.png'
+        plt.savefig(filename_fig, dpi=400, bbox_inches='tight')
+        plt.close()
+
+
 if __name__ == '__main__':
-    run_remove_nodes_centrality()
+    # run_remove_nodes_centrality()
     # run_remove_nodes_centrality_batch()
+    # run_remove_nodes_random_batch()
+    draw_line_graph()
