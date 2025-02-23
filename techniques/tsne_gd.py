@@ -75,7 +75,7 @@ def calculate_joint_probabilities_bh(X, perplexity, metric):
     return P
 
 
-def tsne_prob_graph(X, perplexity, metric, labels=None, epsilon=0.95):
+def tsne_prob_graph(X, perplexity, metric, labels=None, epsilon=0.9):
     size = len(X)
 
     P = 2 * calculate_joint_probabilities(X, perplexity, metric)
@@ -113,7 +113,7 @@ def tsne_prob_graph(X, perplexity, metric, labels=None, epsilon=0.95):
     return g
 
 
-def tsne_bh_prob_graph(X, perplexity, metric, labels=None, epsilon=0.95):
+def tsne_bh_prob_graph(X, perplexity, metric, labels=None, epsilon=0.9):
     size = len(X)
 
     P = calculate_joint_probabilities_bh(X, perplexity, metric).tocoo()

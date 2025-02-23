@@ -127,13 +127,13 @@ def _joint_probabilities_nn(distances, desired_perplexity, verbose):
 
 
 def _kl_divergence(
-    params,
-    P,
-    degrees_of_freedom,
-    n_samples,
-    n_components,
-    skip_num_points=0,
-    compute_error=True,
+        params,
+        P,
+        degrees_of_freedom,
+        n_samples,
+        n_components,
+        skip_num_points=0,
+        compute_error=True,
 ):
     """t-SNE objective function: gradient of the KL divergence
     of p_ijs and q_ijs and the absolute error.
@@ -204,16 +204,16 @@ def _kl_divergence(
 
 
 def _kl_divergence_bh(
-    params,
-    P,
-    degrees_of_freedom,
-    n_samples,
-    n_components,
-    angle=0.5,
-    skip_num_points=0,
-    verbose=False,
-    compute_error=True,
-    num_threads=1,
+        params,
+        P,
+        degrees_of_freedom,
+        n_samples,
+        n_components,
+        angle=0.5,
+        skip_num_points=0,
+        verbose=False,
+        compute_error=True,
+        num_threads=1,
 ):
     """t-SNE objective function: KL divergence of p_ijs and q_ijs.
 
@@ -300,19 +300,19 @@ def _kl_divergence_bh(
 
 
 def _gradient_descent(
-    objective,
-    p0,
-    it,
-    max_iter,
-    n_iter_check=1,
-    n_iter_without_progress=300,
-    momentum=0.8,
-    learning_rate=200.0,
-    min_gain=0.01,
-    min_grad_norm=1e-7,
-    verbose=0,
-    args=None,
-    kwargs=None,
+        objective,
+        p0,
+        it,
+        max_iter,
+        n_iter_check=1,
+        n_iter_without_progress=300,
+        momentum=0.8,
+        learning_rate=200.0,
+        min_gain=0.01,
+        min_grad_norm=1e-7,
+        verbose=0,
+        args=None,
+        kwargs=None,
 ):
     """Batch gradient descent with momentum and individual gains.
 
@@ -549,11 +549,11 @@ def trustworthiness(X, X_embedded, *, n_neighbors=5, metric="euclidean"):
     ordered_indices = np.arange(n_samples + 1)
     inverted_index[ordered_indices[:-1, np.newaxis], ind_X] = ordered_indices[1:]
     ranks = (
-        inverted_index[ordered_indices[:-1, np.newaxis], ind_X_embedded] - n_neighbors
+            inverted_index[ordered_indices[:-1, np.newaxis], ind_X_embedded] - n_neighbors
     )
     t = np.sum(ranks[ranks > 0])
     t = 1.0 - t * (
-        2.0 / (n_samples * n_neighbors * (2.0 * n_samples - 3.0 * n_neighbors - 1.0))
+            2.0 / (n_samples * n_neighbors * (2.0 * n_samples - 3.0 * n_neighbors - 1.0))
     )
     return t
 
@@ -821,26 +821,26 @@ class TSNE(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator):
     _N_ITER_CHECK = 50
 
     def __init__(
-        self,
-        n_components=2,
-        *,
-        perplexity=30.0,
-        early_exaggeration=12.0,
-        learning_rate="auto",
-        max_iter=None,  # TODO(1.7): set to 1000
-        n_iter_without_progress=300,
-        min_grad_norm=1e-7,
-        metric="euclidean",
-        metric_params=None,
-        init="pca",
-        verbose=0,
-        random_state=None,
-        method="barnes_hut",
-        angle=0.5,
-        n_jobs=None,
-        n_iter="deprecated",
-        #
-        probabilities=None
+            self,
+            n_components=2,
+            *,
+            perplexity=30.0,
+            early_exaggeration=12.0,
+            learning_rate="auto",
+            max_iter=1000,  # TODO(1.7): set to 1000
+            n_iter_without_progress=300,
+            min_grad_norm=1e-7,
+            metric="euclidean",
+            metric_params=None,
+            init="pca",
+            verbose=0,
+            random_state=None,
+            method="barnes_hut",
+            angle=0.5,
+            n_jobs=None,
+            n_iter="deprecated",
+            #
+            probabilities=None
     ):
         self.n_components = n_components
         self.perplexity = perplexity
@@ -858,7 +858,7 @@ class TSNE(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator):
         self.angle = angle
         self.n_jobs = n_jobs
         self.n_iter = n_iter
-        self.probabilities=probabilities
+        self.probabilities = probabilities
 
     def _check_params_vs_input(self, X):
         if self.perplexity >= X.shape[0]:
@@ -931,40 +931,41 @@ class TSNE(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator):
 
         neighbors_nn = None
         if self.method == "exact":
-            # Retrieve the distance matrix, either using the precomputed one or
-            # computing it.
-            if self.metric == "precomputed":
-                distances = X
-            else:
-                if self.verbose:
-                    print("[t-SNE] Computing pairwise distances...")
-
-                if self.metric == "euclidean":
-                    # Euclidean is squared here, rather than using **= 2,
-                    # because euclidean_distances already calculates
-                    # squared distances, and returns np.sqrt(dist) for
-                    # squared=False.
-                    # Also, Euclidean is slower for n_jobs>1, so don't set here
-                    distances = pairwise_distances(X, metric=self.metric, squared=True)
-                else:
-                    metric_params_ = self.metric_params or {}
-                    distances = pairwise_distances(
-                        X, metric=self.metric, n_jobs=self.n_jobs, **metric_params_
-                    )
-
-            if np.any(distances < 0):
-                raise ValueError(
-                    "All distances should be positive, the metric given is not correct"
-                )
-
-            if self.metric != "euclidean":
-                distances **= 2
-
-            # compute the joint probability distribution for the input space
-            P = _joint_probabilities(distances, self.perplexity, self.verbose)
             if self.probabilities is not None:
                 P = self.probabilities
-                # print('>>>Using the given probability')
+            else:
+                # Retrieve the distance matrix, either using the precomputed one or
+                # computing it.
+                if self.metric == "precomputed":
+                    distances = X
+                else:
+                    if self.verbose:
+                        print("[t-SNE] Computing pairwise distances...")
+
+                    if self.metric == "euclidean":
+                        # Euclidean is squared here, rather than using **= 2,
+                        # because euclidean_distances already calculates
+                        # squared distances, and returns np.sqrt(dist) for
+                        # squared=False.
+                        # Also, Euclidean is slower for n_jobs>1, so don't set here
+                        distances = pairwise_distances(X, metric=self.metric, squared=True)
+                    else:
+                        metric_params_ = self.metric_params or {}
+                        distances = pairwise_distances(
+                            X, metric=self.metric, n_jobs=self.n_jobs, **metric_params_
+                        )
+
+                if np.any(distances < 0):
+                    raise ValueError(
+                        "All distances should be positive, the metric given is not correct"
+                    )
+
+                if self.metric != "euclidean":
+                    distances **= 2
+
+                # compute the joint probability distribution for the input space
+                P = _joint_probabilities(distances, self.perplexity, self.verbose)
+                self.probabilities = P
 
             assert np.all(np.isfinite(P)), "All probabilities should be finite"
             assert np.all(P >= 0), "All probabilities should be non-negative"
@@ -973,58 +974,59 @@ class TSNE(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator):
             ), "All probabilities should be less or then equal to one"
 
         else:
-            # Compute the number of nearest neighbors to find.
-            # LvdM uses 3 * perplexity as the number of neighbors.
-            # In the event that we have very small # of points
-            # set the neighbors to n - 1.
-            n_neighbors = min(n_samples - 1, int(3.0 * self.perplexity + 1))
-
-            if self.verbose:
-                print("[t-SNE] Computing {} nearest neighbors...".format(n_neighbors))
-
-            # Find the nearest neighbors for every point
-            knn = NearestNeighbors(
-                algorithm="auto",
-                n_jobs=self.n_jobs,
-                n_neighbors=n_neighbors,
-                metric=self.metric,
-                metric_params=self.metric_params,
-            )
-            t0 = time()
-            knn.fit(X)
-            duration = time() - t0
-            if self.verbose:
-                print(
-                    "[t-SNE] Indexed {} samples in {:.3f}s...".format(
-                        n_samples, duration
-                    )
-                )
-
-            t0 = time()
-            distances_nn = knn.kneighbors_graph(mode="distance")
-            duration = time() - t0
-            if self.verbose:
-                print(
-                    "[t-SNE] Computed neighbors for {} samples in {:.3f}s...".format(
-                        n_samples, duration
-                    )
-                )
-
-            # Free the memory used by the ball_tree
-            del knn
-
-            # knn return the euclidean distance but we need it squared
-            # to be consistent with the 'exact' method. Note that the
-            # the method was derived using the euclidean method as in the
-            # input space. Not sure of the implication of using a different
-            # metric.
-            distances_nn.data **= 2
-
-            # compute the joint probability distribution for the input space
-            P = _joint_probabilities_nn(distances_nn, self.perplexity, self.verbose)
             if self.probabilities is not None:
                 P = self.probabilities
-                # print('>>>Using the given probability')
+            else:
+                # Compute the number of nearest neighbors to find.
+                # LvdM uses 3 * perplexity as the number of neighbors.
+                # In the event that we have very small # of points
+                # set the neighbors to n - 1.
+                n_neighbors = min(n_samples - 1, int(3.0 * self.perplexity + 1))
+
+                if self.verbose:
+                    print("[t-SNE] Computing {} nearest neighbors...".format(n_neighbors))
+
+                # Find the nearest neighbors for every point
+                knn = NearestNeighbors(
+                    algorithm="auto",
+                    n_jobs=self.n_jobs,
+                    n_neighbors=n_neighbors,
+                    metric=self.metric,
+                    metric_params=self.metric_params,
+                )
+                t0 = time()
+                knn.fit(X)
+                duration = time() - t0
+                if self.verbose:
+                    print(
+                        "[t-SNE] Indexed {} samples in {:.3f}s...".format(
+                            n_samples, duration
+                        )
+                    )
+
+                t0 = time()
+                distances_nn = knn.kneighbors_graph(mode="distance")
+                duration = time() - t0
+                if self.verbose:
+                    print(
+                        "[t-SNE] Computed neighbors for {} samples in {:.3f}s...".format(
+                            n_samples, duration
+                        )
+                    )
+
+                # Free the memory used by the ball_tree
+                del knn
+
+                # knn return the euclidean distance but we need it squared
+                # to be consistent with the 'exact' method. Note that the
+                # the method was derived using the euclidean method as in the
+                # input space. Not sure of the implication of using a different
+                # metric.
+                distances_nn.data **= 2
+
+                # compute the joint probability distribution for the input space
+                P = _joint_probabilities_nn(distances_nn, self.perplexity, self.verbose)
+                self.probabilities = P
 
         if isinstance(self.init, np.ndarray):
             X_embedded = self.init
@@ -1063,13 +1065,13 @@ class TSNE(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator):
         )
 
     def _tsne(
-        self,
-        P,
-        degrees_of_freedom,
-        n_samples,
-        X_embedded,
-        neighbors=None,
-        skip_num_points=0,
+            self,
+            P,
+            degrees_of_freedom,
+            n_samples,
+            X_embedded,
+            neighbors=None,
+            skip_num_points=0,
     ):
         """Runs t-SNE."""
         # t-SNE minimizes the Kullback-Leiber divergence of the Gaussians P
@@ -1115,9 +1117,9 @@ class TSNE(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator):
         # Learning schedule (part 2): disable early exaggeration and finish
         # optimization with a higher momentum at 0.8
         P /= self.early_exaggeration
-        remaining = self._max_iter - self._EXPLORATION_MAX_ITER
+        remaining = self.max_iter - self._EXPLORATION_MAX_ITER
         if it < self._EXPLORATION_MAX_ITER or remaining > 0:
-            opt_args["max_iter"] = self._max_iter
+            opt_args["max_iter"] = self.max_iter
             opt_args["it"] = it + 1
             opt_args["momentum"] = 0.8
             opt_args["n_iter_without_progress"] = self.n_iter_without_progress
@@ -1214,7 +1216,7 @@ class TSNE(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator):
         self : object
             Fitted estimator.
         """
-        self.fit_transform(X)
+        self._fit(X)
         return self
 
     @property
@@ -1226,3 +1228,26 @@ class TSNE(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator):
         tags = super().__sklearn_tags__()
         tags.input_tags.pairwise = self.metric == "precomputed"
         return tags
+
+    def get_probabilities(self):
+        if self.method == "exact":  # create a csr_matrix representation
+            size = len(self.probabilities)
+
+            row = np.zeros(size * size)
+            col = np.zeros(size * size)
+            data = np.zeros(size * size)
+
+            k = 0
+            for i in range(size):
+                for j in range(size):
+                    row[k] = i
+                    col[k] = j
+                    data[k] = self.probabilities[i][j]
+                    k = k + 1
+
+            P = csr_matrix((data, (row, col)), shape=(size, size))
+            P = P + P.T
+            P /= np.maximum(P.sum(), MACHINE_EPSILON)
+            return P
+        else:
+            return self.probabilities
