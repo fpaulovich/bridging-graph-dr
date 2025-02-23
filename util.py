@@ -7,6 +7,7 @@ from sklearn.decomposition import PCA
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib
 
 import math
 
@@ -161,3 +162,43 @@ def draw_projection(y, label, filename=None):
     else:
         plt.show()
     plt.close()
+
+
+def draw_graph_no_positions(g, y, labels, filename=None):
+    pos = {}
+    for n in range(len(y)):
+        pos[str(n)] = (y[n][0], y[n][1])
+
+    plt.figure(figsize=(6, 6))
+
+    nodes = nx.draw_networkx_nodes(g,
+                                   pos=pos,
+                                   node_color=labels,
+                                   cmap=plt.cm.Set1,
+                                   node_size=15,
+                                   linewidths=0.25)
+
+    edges = nx.draw_networkx_edges(g,
+                                   pos=pos,
+                                   edge_color='silver',
+                                   width=0.5)
+
+    # cb = plt.colorbar(nodes,
+    #                   orientation='horizontal',
+    #                   pad=0.025,
+    #                   label='Digits')
+
+    ax = plt.gca()  # to get the current axis
+    ax.collections[0].set_edgecolor("#000000")
+
+    plt.tick_params(left=False,
+                    bottom=False,
+                    labelleft=False,
+                    labelbottom=False)
+
+    if filename is not None:
+        plt.savefig(filename, dpi=300, bbox_inches='tight')
+    else:
+        plt.show()
+    plt.close()
+

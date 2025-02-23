@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from techniques.t_sne import TSNE
 from techniques.metrics import stress, neighborhood_preservation, neighborhood_hit
 
-from util import load_data, draw_graph_with_positions, draw_projection
+from util import load_data, draw_graph_with_positions, draw_projection, draw_graph_no_positions
 
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from sklearn.manifold import trustworthiness
@@ -16,6 +16,7 @@ from sklearn.metrics import silhouette_score
 from metrics.local import sortedness
 from scipy.stats import weightedtau
 
+import seaborn as sns
 import pandas as pd
 
 from t_sne_bridging_dr_gd import tsne_prob_graph, draw_graph_by_tsne, remove_nodes_centrality, remove_nodes_random
@@ -237,7 +238,7 @@ def run_remove_nodes_centrality_batch():
     dir_base_dataset = '/Users/fpaulovich/Documents/data/'
     dir_base_graph = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/survey_dr/tsne/'
 
-    # datasets = ['cnae9', 'coil20', 'fashion_mnist', 'har', 'spambase']
+    datasets = ['cnae9', 'coil20', 'fashion_mnist', 'har', 'spambase']
 
     percentages = [0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60]
 
@@ -264,12 +265,12 @@ def run_remove_nodes_centrality_batch():
         filename_graph = dir_base_graph + dataset + '-tsne.graphml'
         g = nx.read_graphml(filename_graph)
 
-        # draw graph
-        filename_fig = dir_base_graph + 'reduced/' + dataset + '[1.00]-reduced_graph_tsne.png'
-        draw_graph_with_positions(g, filename_fig)
-
         # draw the graph using t-SNE
         y, label = draw_graph_by_tsne(X, g)
+
+        # draw graph
+        filename_fig = dir_base_graph + 'reduced/' + dataset + '[1.00]-reduced_graph_tsne.png'
+        draw_graph_no_positions(g, y, label, filename=filename_fig)
 
         # save image
         filename_fig = dir_base_graph + 'reduced/' + dataset + '[1.00]-reduced_tsne.png'
@@ -363,7 +364,7 @@ def run_remove_nodes_random_batch():
     dir_base_dataset = '/Users/fpaulovich/Documents/data/'
     dir_base_graph = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/survey_dr/tsne/'
 
-    # datasets = ['cnae9', 'coil20', 'fashion_mnist', 'har', 'spambase']
+    datasets = ['cnae9', 'coil20', 'fashion_mnist', 'har', 'spambase']
 
     percentages = [0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60]
 
@@ -390,12 +391,12 @@ def run_remove_nodes_random_batch():
         filename_graph = dir_base_graph + dataset + '-tsne.graphml'
         g = nx.read_graphml(filename_graph)
 
-        # draw graph
-        filename_fig = dir_base_graph + 'reduced_random/' + dataset + '[1.00]-reduced_graph_tsne.png'
-        draw_graph_with_positions(g, filename_fig)
-
         # draw the graph using t-SNE
         y, label = draw_graph_by_tsne(X, g)
+
+        # draw graph
+        filename_fig = dir_base_graph + 'reduced_random/' + dataset + '[1.00]-reduced_graph_tsne.png'
+        draw_graph_no_positions(g, y, label, filename=filename_fig)
 
         # save image
         filename_fig = dir_base_graph + 'reduced_random/' + dataset + '[1.00]-reduced_tsne.png'
@@ -508,17 +509,82 @@ def draw_line_graph():
         plt.gca().invert_xaxis()
 
         filename_fig = dir_base_graph + 'reduced_random/metric_' + metric + '.png'
-        plt.savefig(filename_fig, dpi=400, bbox_inches='tight')
+        plt.savefig(filename_fig, dpi=300, bbox_inches='tight')
         plt.close()
+
+
+def heatmap():
+    # metrics = ['sortedness', 'sortedness_weightedtau', 'trustworthiness', 'stress',
+    #            'silhouette_score', 'neighborhood_preservation', 'neighborhood_hit']
+
+    metrics = ['trustworthiness', 'silhouette_score', 'neighborhood_preservation', 'neighborhood_hit']
+
+    datasets = ['fashion_mnist', 'cnae9', 'coil20', 'fashion_mnist', 'har', 'spambase']
+
+    dir_base_graph = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/survey_dr/tsne/'
+
+    for dataset in datasets:
+        filename_metrics = dir_base_graph + 'reduced/' + dataset + '-metrics.csv'
+        df_metrics = pd.read_csv(filename_metrics, sep=',')
+        df_metrics_original = df_metrics.copy()
+
+        new_df_metrics = pd.DataFrame(columns=['percentage',
+                                               'metric',
+                                               'score'])
+
+        new_df_metrics_original = pd.DataFrame(columns=['percentage',
+                                                        'metric',
+                                                        'score'])
+
+        for i in range(len(df_metrics)):
+            for metric in metrics:
+                new_df_metrics_original.loc[len(new_df_metrics_original)] = [df_metrics_original.loc[i]['percentage'],
+                                                                             metric,
+                                                                             float(df_metrics_original.loc[i][metric])]
+
+                min_val = df_metrics.min(axis=0)[metric]
+                max_val = df_metrics.max(axis=0)[metric]
+
+                df_metrics[metric] = df_metrics[metric].sub(min_val)
+                df_metrics[metric] = df_metrics[metric].div(max_val)
+
+                new_df_metrics.loc[len(new_df_metrics)] = [df_metrics.loc[i]['percentage'],
+                                                           metric,
+                                                           float(df_metrics.loc[i][metric])]
+
+        new_df_metrics = new_df_metrics.pivot(index="metric", columns="percentage", values="score")
+        new_df_metrics_original = new_df_metrics_original.pivot(index="metric", columns="percentage", values="score")
+
+        color_map = plt.cm.get_cmap('cividis')  # .reversed()
+
+        fig, ax = plt.subplots(figsize=(16, 14))
+        sns.heatmap(new_df_metrics, cbar=False,
+                    robust=True, annot_kws={"size": 25}, fmt=".3f",
+                    linewidths=2, linecolor='white', annot=new_df_metrics_original,
+                    cbar_kws={'orientation': 'vertical'}, cmap=color_map,
+                    yticklabels=['N.Hit', 'N.Preservation', 'Silhouette', 'Trustworthiness'])
+
+        plt.yticks(rotation=0, fontsize=25)
+        plt.xticks(rotation=0, fontsize=25)
+        ax.set(xlabel="", ylabel="")
+        # plt.xticks(rotation=20, fontsize=20, ha='right')
+        # plt.title(title, fontsize=30)
+
+        filename_fig = dir_base_graph + 'reduced/heatmap_' + dataset + '.png'
+        plt.savefig(filename_fig, dpi=300, bbox_inches='tight')
+        # plt.show()
+
+    return
 
 
 if __name__ == '__main__':
     # run_generate_all_tsne_graphs()
     # run_draw_all_graphs_by_tsne()
 
-    # run_remove_nodes_centrality()
-
     # run_remove_nodes_centrality_batch()
-    run_remove_nodes_random_batch()
+    # run_remove_nodes_random_batch()
 
+    # run_remove_nodes_centrality()
     # draw_line_graph()
+
+    heatmap()
