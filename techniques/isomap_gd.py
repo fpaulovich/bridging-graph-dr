@@ -5,7 +5,7 @@
 
 import math
 from sklearn.manifold import Isomap
-from util import draw_graph, write_graphml
+from util import draw_graph_forceatlas2, write_graphml
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import DistanceMetric
@@ -86,7 +86,7 @@ def gd_isomap(X, labels, filename_fig, filename_graph, nr_neighbors=10):
                      metric=metric,
                      labels=labels)
 
-    pos = draw_graph(X, g, labels, filename_fig)
+    pos = draw_graph_forceatlas2(X, g, labels, filename_fig)
     write_graphml(g, pos, filename_graph)
 
 

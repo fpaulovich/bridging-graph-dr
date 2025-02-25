@@ -15,7 +15,7 @@ from sklearn import preprocessing
 import sklearn.datasets as datasets
 
 from techniques.tsne_gd import tsne, tsne_bh_prob_graph
-from util import draw_graph
+from util import draw_graph_forceatlas2
 
 
 def precision(g):

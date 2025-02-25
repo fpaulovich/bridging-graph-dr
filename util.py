@@ -7,8 +7,6 @@ from sklearn.decomposition import PCA
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib
-
 import math
 
 
@@ -37,36 +35,41 @@ def init(X):
     return pos
 
 
-def draw_graph(X, g, labels, filename=None):
+def draw_graph_forceatlas2(X, g, labels, filename=None):
     init_pos = init(X)
     size = len(X)
 
-    # pos = nx.forceatlas2_layout(g,
-    #                             pos=init_pos,
-    #                             weight='weight',
-    #                             seed=1,
-    #                             max_iter=1000,
-    #                             scaling_ratio=2,
-    #                             dissuade_hubs=False,
-    #                             linlog=False)
+    pos = nx.forceatlas2_layout(g,
+                                pos=init_pos,
+                                weight='weight',
+                                seed=42,
+                                max_iter=100,
+                                scaling_ratio=2,
+                                dissuade_hubs=False,
+                                linlog=False)
 
-    pos = nx.fruchterman_reingold_layout(g,
-                                         pos=init_pos,
-                                         weight='weight',
-                                         seed=1,
-                                         iterations=100,
-                                         k=1 / math.sqrt(size))
+    # pos = nx.fruchterman_reingold_layout(g,
+    #                                      pos=init_pos,
+    #                                      weight='weight',
+    #                                      seed=1,
+    #                                      iterations=100,
+    #                                      k=1 / math.sqrt(size))
 
-    plt.figure(figsize=(6, 5))
+    plt.figure(figsize=(6, 6))
 
     # drawing the graph
-    nx.draw(g, pos=pos,
-            with_labels=False,
-            node_color=labels,
-            cmap=plt.cm.tab10,
-            node_size=15,
-            edge_color='silver',
-            width=0.5)
+    nodes = nx.draw_networkx_nodes(g,
+                                   pos=pos,
+                                   node_color=labels,
+                                   cmap=plt.cm.Set1,
+                                   node_size=15,
+                                   linewidths=0.25)
+
+    edges = nx.draw_networkx_edges(g,
+                                   pos=pos,
+                                   edge_color='silver',
+                                   width=0.5)
+
     ax = plt.gca()  # to get the current axis
     ax.collections[0].set_edgecolor("#000000")
 
@@ -84,29 +87,35 @@ def draw_graph(X, g, labels, filename=None):
     return pos
 
 
-def draw_graph_with_positions(g, filename=None):
+def draw_graph_with_positions(g, labels=None, cmap=plt.cm.Set1, color_bar_title=None, vmin=None, vmax=None, filename=None):
     pos = {}
     for n, data in g.nodes.items():
         pos[n] = (data['x'], data['y'])
+
+    if labels is None:
+        labels = list(map(int, nx.get_node_attributes(g, 'label').values()))
 
     plt.figure(figsize=(6, 6))
 
     nodes = nx.draw_networkx_nodes(g,
                                    pos=pos,
-                                   node_color=list(map(int, nx.get_node_attributes(g, 'label').values())),
-                                   cmap=plt.cm.Set1,
+                                   node_color=labels,
+                                   cmap=cmap,
                                    node_size=15,
-                                   linewidths=0.25)
+                                   linewidths=0.25,
+                                   vmin=vmin,
+                                   vmax=vmax)
 
     edges = nx.draw_networkx_edges(g,
                                    pos=pos,
                                    edge_color='silver',
                                    width=0.5)
 
-    # cb = plt.colorbar(nodes,
-    #                   orientation='horizontal',
-    #                   pad=0.025,
-    #                   label='Digits')
+    if color_bar_title is not None:
+        cb = plt.colorbar(nodes,
+                          orientation='horizontal',
+                          pad=0.025,
+                          label=color_bar_title)
 
     ax = plt.gca()  # to get the current axis
     ax.collections[0].set_edgecolor("#000000")
@@ -123,7 +132,7 @@ def draw_graph_with_positions(g, filename=None):
     plt.close()
 
 
-def draw_projection(y, label, filename=None):
+def draw_projection(y, label, cmap=plt.cm.Set1, color_bar_title=None, filename=None):
     # create nodes position based on the DR coordinates
     pos = {}
     for n in range(len(y)):
@@ -140,14 +149,15 @@ def draw_projection(y, label, filename=None):
     nodes = nx.draw_networkx_nodes(g,
                                    pos=pos,
                                    node_color=label,
-                                   cmap=plt.cm.Set1,
+                                   cmap=cmap,
                                    node_size=15,
                                    linewidths=0.25)
 
-    # cb = plt.colorbar(nodes,
-    #                   orientation='horizontal',
-    #                   pad=0.025,
-    #                   label='Digits')
+    if color_bar_title is not None:
+        cb = plt.colorbar(nodes,
+                          orientation='horizontal',
+                          pad=0.025,
+                          label=color_bar_title)
 
     ax = plt.gca()  # to get the current axis
     ax.collections[0].set_edgecolor("#000000")
@@ -201,4 +211,3 @@ def draw_graph_no_positions(g, y, labels, filename=None):
     else:
         plt.show()
     plt.close()
-

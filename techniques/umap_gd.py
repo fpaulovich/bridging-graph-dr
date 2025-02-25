@@ -4,7 +4,7 @@
 # License: MIT
 
 from umap import UMAP
-from util import draw_graph, write_graphml
+from util import draw_graph_forceatlas2, write_graphml
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -86,5 +86,5 @@ def gd_umap(X, labels, filename_fig, filename_graph, nr_neighbors=10):
 
     g = umap_graph(X, nr_neighbors, metric, labels=labels)
 
-    pos = draw_graph(X, g, labels, filename_fig)
+    pos = draw_graph_forceatlas2(X, g, labels, filename_fig)
     write_graphml(g, pos, filename_graph)

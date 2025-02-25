@@ -8,7 +8,7 @@ from sklearn.manifold._t_sne import _joint_probabilities_nn
 from sklearn.manifold._t_sne import _joint_probabilities
 from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.neighbors import NearestNeighbors
-from util import draw_graph, write_graphml
+from util import draw_graph_forceatlas2, write_graphml
 import networkx as nx
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
@@ -158,7 +158,7 @@ def gd_tsne(X, labels, filename_fig, filename_graph, perplexity=10):
     # g = tsne_prob_graph(X, perplexity, metric, labels, epsilon=0.9) # original probability t-SNE graph
     g = tsne_bh_prob_graph(X, perplexity, metric, labels, epsilon=0.9)  # Barnes-Hut probability t-SNE graph
 
-    pos = draw_graph(X, g, labels, filename_fig)
+    pos = draw_graph_forceatlas2(X, g, labels, filename_fig)
     write_graphml(g, pos, filename_graph)
 
     return g

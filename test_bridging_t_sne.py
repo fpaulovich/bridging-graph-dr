@@ -1,5 +1,3 @@
-import math
-
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -20,7 +18,7 @@ import seaborn as sns
 import pandas as pd
 
 from t_sne_bridging_dr_gd import tsne_prob_graph, draw_graph_by_tsne, remove_nodes_centrality, remove_nodes_random
-from util import draw_graph, write_graphml
+from util import draw_graph_forceatlas2, write_graphml
 
 MACHINE_EPSILON = np.finfo(np.double).eps
 
@@ -49,7 +47,7 @@ def run_generate_all_tsne_graphs():
         filename_fig = dir_name_output + dataset + '-gd_tsne.png'
         filename_graph = dir_name_output + dataset + '-tsne.graphml'
 
-        pos = draw_graph(X, g, y, filename_fig)
+        pos = draw_graph_forceatlas2(X, g, y, filename_fig)
         write_graphml(g, pos, filename_graph)
 
     return
