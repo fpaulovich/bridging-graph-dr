@@ -30,7 +30,7 @@ def pairwise_graph(X, metric, labels=None):
     for i in range(size):
         for j in range(size):
             if i != j:
-                weight = math.pow((1 - dist_mat[i][j]), 2)
+                weight = 1 - dist_mat[i][j]  # math.pow((1 - dist_mat[i][j]), 2)
 
                 g.add_edge(i, j, weight=weight)
                 g.add_edge(j, i, weight=weight)

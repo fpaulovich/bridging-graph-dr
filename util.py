@@ -43,7 +43,7 @@ def draw_graph_forceatlas2(X, g, labels, filename=None):
                                 pos=init_pos,
                                 weight='weight',
                                 seed=42,
-                                max_iter=100,
+                                max_iter=1000,
                                 scaling_ratio=2,
                                 dissuade_hubs=False,
                                 linlog=False)
@@ -52,7 +52,7 @@ def draw_graph_forceatlas2(X, g, labels, filename=None):
     #                                      pos=init_pos,
     #                                      weight='weight',
     #                                      seed=1,
-    #                                      iterations=100,
+    #                                      iterations=1000,
     #                                      k=1 / math.sqrt(size))
 
     plt.figure(figsize=(6, 6))
@@ -95,7 +95,7 @@ def draw_graph_with_positions(g, labels=None, cmap=plt.cm.Set1, color_bar_title=
     if labels is None:
         labels = list(map(int, nx.get_node_attributes(g, 'label').values()))
 
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(7, 6))
 
     nodes = nx.draw_networkx_nodes(g,
                                    pos=pos,
@@ -113,7 +113,7 @@ def draw_graph_with_positions(g, labels=None, cmap=plt.cm.Set1, color_bar_title=
 
     if color_bar_title is not None:
         cb = plt.colorbar(nodes,
-                          orientation='horizontal',
+                          orientation='vertical',
                           pad=0.025,
                           label=color_bar_title)
 

@@ -1,6 +1,7 @@
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
+import math
 
 from techniques.t_sne import TSNE
 from techniques.metrics import stress, neighborhood_preservation, neighborhood_hit
@@ -23,6 +24,7 @@ from util import draw_graph_forceatlas2, write_graphml
 from techniques.knn_gd import knn_graph
 from techniques.umap_gd import umap_graph
 from techniques.snn_gd import snn_graph
+from techniques.pairwise_gd import pairwise_graph
 
 from umap import UMAP
 
@@ -44,19 +46,27 @@ def fig_1():
     labels = LabelEncoder().fit_transform(labels)
 
     ##########################################
+    # create fully connected
+    g = pairwise_graph(X, metric='euclidean', labels=labels)
+    filename = dir_output + dataset + '-pairwise_force_atlas_graph.png'
+    pos = draw_graph_forceatlas2(X, g, labels, filename=filename)
+    filename = dir_output + dataset + '-pairwise_force_atlas_graph.graphml'
+    write_graphml(g, pos, filename)
+
+    ##########################################
     # create the graph SNN
     g = snn_graph(X, nr_neighbors, metric='euclidean', labels=labels)
-    filename = dir_output + dataset + '-snn_graph.png'
+    filename = dir_output + dataset + '-snn_force_atlas_graph.png'
     pos = draw_graph_forceatlas2(X, g, labels, filename=filename)
-    filename = dir_output + dataset + '-snn_graph.graphml'
+    filename = dir_output + dataset + '-snn_force_atlas_graph.graphml'
     write_graphml(g, pos, filename)
 
     ##########################################
     # create the graph kNN
     g = knn_graph(X, nr_neighbors, metric='euclidean', labels=labels)
-    filename = dir_output + dataset + '-knn_graph.png'
+    filename = dir_output + dataset + '-knn_force_atlas_graph.png'
     pos = draw_graph_forceatlas2(X, g, labels, filename=filename)
-    filename = dir_output + dataset + '-knn_graph.graphml'
+    filename = dir_output + dataset + '-knn_force_atlas_graph.graphml'
     write_graphml(g, pos, filename)
 
     ##########################################
@@ -69,17 +79,17 @@ def fig_1():
         weight[key] = weight[key] * 1000
     nx.set_edge_attributes(g, weight, 'weight')
 
-    filename = dir_output + dataset + '-tsne_graph.png'
+    filename = dir_output + dataset + '-tsne_force_atlas_graph.png'
     pos = draw_graph_forceatlas2(X, g, labels, filename=filename)
-    filename = dir_output + dataset + '-tsne_graph.graphml'
+    filename = dir_output + dataset + '-tsne_force_atlas_graph.graphml'
     write_graphml(g, pos, filename)
 
     ##########################################
     # create the graph t-SNE
     g = umap_graph(X, nr_neighbors, metric='euclidean', labels=labels)
-    filename = dir_output + dataset + '-umap_graph.png'
+    filename = dir_output + dataset + '-umap_force_atlas_graph.png'
     pos = draw_graph_forceatlas2(X, g, labels, filename=filename)
-    filename = dir_output + dataset + '-umap_graph.graphml'
+    filename = dir_output + dataset + '-umap_force_atlas_graph.graphml'
     write_graphml(g, pos, filename)
 
     return
@@ -90,27 +100,35 @@ def fig_2():
     dir_base = '/Users/fpaulovich/Documents/data/'
     dataset = 'fashion_mnist'
 
-    # color KNN by centrality
-    filename = dir_output + dataset + '-knn_graph.graphml'
+    # color SNN by centrality
+    filename = dir_output + dataset + '-snn_force_atlas_graph.graphml'
     g = nx.read_graphml(filename)
     centrality = list(map(float, nx.closeness_centrality(g).values()))
-    filename = dir_output + dataset + '-knn_graph_centrality.png'
+    filename = dir_output + dataset + '-snn_force_atlas_graph_centrality.png'
+    draw_graph_with_positions(g, labels=centrality, cmap=plt.cm.cividis_r,
+                              color_bar_title='closeness centrality', filename=filename)
+
+    # color KNN by centrality
+    filename = dir_output + dataset + '-knn_force_atlas_graph.graphml'
+    g = nx.read_graphml(filename)
+    centrality = list(map(float, nx.closeness_centrality(g).values()))
+    filename = dir_output + dataset + '-knn_force_atlas_graph_centrality.png'
     draw_graph_with_positions(g, labels=centrality, cmap=plt.cm.cividis_r,
                               color_bar_title='closeness centrality', filename=filename)
 
     # color t-SNE by centrality
-    filename = dir_output + dataset + '-tsne_graph.graphml'
+    filename = dir_output + dataset + '-tsne_force_atlas_graph.graphml'
     g = nx.read_graphml(filename)
     centrality = list(map(float, nx.closeness_centrality(g).values()))
-    filename = dir_output + dataset + '-tsne_graph_centrality.png'
+    filename = dir_output + dataset + '-tsne_force_atlas_graph_centrality.png'
     draw_graph_with_positions(g, labels=centrality, cmap=plt.cm.cividis_r,
                               color_bar_title='closeness centrality', filename=filename)
 
     # color UMAP by centrality
-    filename = dir_output + dataset + '-umap_graph.graphml'
+    filename = dir_output + dataset + '-umap_force_atlas_graph.graphml'
     g = nx.read_graphml(filename)
     centrality = list(map(float, nx.closeness_centrality(g).values()))
-    filename = dir_output + dataset + '-umap_graph_centrality.png'
+    filename = dir_output + dataset + '-umap_force_atlas_graph_centrality.png'
     draw_graph_with_positions(g, labels=centrality, cmap=plt.cm.cividis_r,
                               color_bar_title='closeness centrality', filename=filename)
 
@@ -141,10 +159,10 @@ def fig_3():
     filename = dir_output + dataset + '-tsne.png'
     draw_projection(y, labels, cmap=plt.cm.Set1, color_bar_title=None, filename=filename)
 
-    filename = dir_output + dataset + '-tsne_graph.graphml'
+    filename = dir_output + dataset + '-tsne_force_atlas_graph.graphml'
     g = nx.read_graphml(filename)
     centrality = list(map(float, nx.closeness_centrality(g).values()))
-    filename = dir_output + dataset + '-tsne_centrality.png'
+    filename = dir_output + dataset + '-tsne_force_atlas_centrality.png'
     draw_projection(y, centrality, cmap=plt.cm.cividis_r,
                     color_bar_title='closeness centrality', filename=filename)
 
@@ -156,10 +174,10 @@ def fig_3():
     filename = dir_output + dataset + '-umap.png'
     draw_projection(y, labels, cmap=plt.cm.Set1, color_bar_title=None, filename=filename)
 
-    filename = dir_output + dataset + '-umap_graph.graphml'
+    filename = dir_output + dataset + '-umap_force_atlas_graph.graphml'
     g = nx.read_graphml(filename)
     centrality = list(map(float, nx.closeness_centrality(g).values()))
-    filename = dir_output + dataset + '-umap_centrality.png'
+    filename = dir_output + dataset + '-umap_force_atlas_centrality.png'
     draw_projection(y, centrality, cmap=plt.cm.cividis_r,
                     color_bar_title='closeness centrality', filename=filename)
 
@@ -168,7 +186,7 @@ def fig_3():
 
 def fig_4():
     dir_base_graph = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/paper_figs/'
-    filename_graph = dir_base_graph + 'fashion_mnist-tsne_graph.graphml'
+    filename_graph = dir_base_graph + 'fashion_mnist-tsne_force_atlas_graph.graphml'
 
     dir_base = '/Users/fpaulovich/Documents/data/'
     dataset = 'fashion_mnist'
@@ -212,19 +230,19 @@ def fig_4():
 
     centrality = list(map(float, nx.closeness_centrality(g).values()))
     filename_fig = dir_base_graph + 'reduced/' + dataset + '[1.00]-reduced_graph_centrality_tsne.png'
-    draw_graph_with_positions(g, labels=centrality, cmap=plt.cm.cividis_r, vmin=0, vmax=0.3,
-                              color_bar_title='closeness centrality', filename=filename_fig)
+    draw_graph_with_positions(g, labels=centrality, cmap=plt.cm.YlGnBu, color_bar_title='closeness centrality',
+                              filename=filename_fig)
 
     # # draw the graph using t-SNE
-    # y, label = draw_graph_by_tsne(X, g)
+    y, label = draw_graph_by_tsne(X, g)
 
     # save projection image
     filename_fig = dir_base_graph + 'reduced/' + dataset + '[1.00]-reduced_tsne.png'
     draw_projection(y, label, filename=filename_fig)
 
     filename_fig = dir_base_graph + 'reduced/' + dataset + '[1.00]-reduced_centrality_tsne.png'
-    draw_projection(y, centrality, cmap=plt.cm.cividis_r,
-                    color_bar_title='closeness centrality', filename=filename_fig)
+    draw_projection(y, centrality, cmap=plt.cm.YlGnBu, color_bar_title='closeness centrality',
+                    filename=filename_fig)
 
     # calculate metrics for the original
     print('---')
@@ -295,7 +313,7 @@ def fig_4():
         centrality = list(map(float, nx.closeness_centrality(g_removed).values()))
         filename_fig_reduced = dir_base_graph + 'reduced/' + dataset + '[' + str(
             percentage) + ']-reduced_graph_centrality_tsne.png'
-        draw_graph_with_positions(g_removed, labels=centrality, cmap=plt.cm.cividis_r, vmin=0, vmax=0.3,
+        draw_graph_with_positions(g_removed, labels=centrality, cmap=plt.cm.cividis_r,
                                   color_bar_title='closeness centrality', filename=filename_fig_reduced)
 
         metrics_df.loc[len(metrics_df)] = [percentage,
@@ -326,13 +344,26 @@ def fig_4():
 def fig_5():
     dir_base_graph = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/paper_figs/'
 
-    metrics = ['stress', 'sortedness', 'trustworthiness', 'neighborhood_preservation', 'neighborhood_hit',
+    metrics = ['stress', 'trustworthiness', 'neighborhood_preservation', 'neighborhood_hit',
                'silhouette_score']
     dataset = 'fashion_mnist'
 
     filename_metrics = dir_base_graph + 'reduced/' + dataset + '-metrics.csv'
     df_metrics = pd.read_csv(filename_metrics, sep=',')
+
+    # invert stress
+    for i in range(len(df_metrics)):
+        df_metrics.loc[i, 'stress'] = 1.0 - df_metrics.loc[i]['stress']
+
     df_metrics_original = df_metrics.copy()
+
+    # normalize between zero and one
+    for metric in metrics:
+        min_val = df_metrics.min(axis=0)[metric]
+        df_metrics[metric] = df_metrics[metric].sub(min_val)
+
+        max_val = df_metrics.max(axis=0)[metric]
+        df_metrics[metric] = df_metrics[metric].div(max_val)
 
     new_df_metrics = pd.DataFrame(columns=['percentage',
                                            'metric',
@@ -344,21 +375,17 @@ def fig_5():
 
     for i in range(len(df_metrics)):
         for metric in metrics:
-            new_df_metrics_original.loc[len(new_df_metrics_original)] = [df_metrics_original.loc[i]['percentage'],
+            perc = int(round(((1.0 - df_metrics_original.loc[i]['percentage']) * 100), 0))
+            new_df_metrics_original.loc[len(new_df_metrics_original)] = [f'{perc:02}%',
                                                                          metric,
                                                                          round(
                                                                              float(df_metrics_original.loc[i][metric]),
-                                                                             3)]
+                                                                             4)]
 
-            min_val = df_metrics.min(axis=0)[metric]
-            max_val = df_metrics.max(axis=0)[metric]
-
-            df_metrics[metric] = df_metrics[metric].sub(min_val)
-            df_metrics[metric] = df_metrics[metric].div(max_val)
-
-            new_df_metrics.loc[len(new_df_metrics)] = [df_metrics.loc[i]['percentage'],
+            perc = int(round(((1.0 - df_metrics.loc[i]['percentage']) * 100), 0))
+            new_df_metrics.loc[len(new_df_metrics)] = [f'{perc:02}%',
                                                        metric,
-                                                       round(float(df_metrics.loc[i][metric]), 3)]
+                                                       round(float(df_metrics.loc[i][metric]), 4)]
 
     new_df_metrics = new_df_metrics.pivot(index="percentage", columns="metric", values="score")
     new_df_metrics_original = new_df_metrics_original.pivot(index="percentage", columns="metric", values="score")
@@ -367,10 +394,10 @@ def fig_5():
 
     fig, ax = plt.subplots(figsize=(16, 14))
     sns.heatmap(new_df_metrics, cbar=False,
-                robust=True, annot_kws={"size": 25}, fmt=".3f",
+                robust=True, annot_kws={"size": 25}, fmt=".4f",
                 linewidths=2, linecolor='white', annot=new_df_metrics_original,
-                cbar_kws={'orientation': 'vertical'}, cmap=plt.cm.cividis_r,
-                xticklabels=['N.Hit', 'N.Preservation', 'Silhouette', 'Sortedness', 'Stress', 'Trustworthiness']
+                cbar_kws={'orientation': 'vertical'}, cmap=plt.cm.YlGnBu,
+                xticklabels=['N.Hit', 'N.Preservation', 'Silhouette', ' 1-Stress', 'Trustworthiness']
                 )
 
     plt.yticks(rotation=0, fontsize=25)
@@ -386,10 +413,33 @@ def fig_5():
     return
 
 
+def faithfulness_graph_topologies():
+    filename_knn = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/paper_figs/' \
+                   'fashion_mnist-knn_force_atlas_graph.graphml'
+    filename_tsne = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/paper_figs/' \
+                    'fashion_mnist-tsne_force_atlas_graph.graphml'
+    filename_umap = '/Users/fpaulovich/OneDrive - TU Eindhoven/Dropbox/papers/2024/bridging_dr_graph/paper_figs/' \
+                    'fashion_mnist-umap_force_atlas_graph.graphml'
+
+    g_umap = nx.read_graphml(filename_umap)
+    g_tsne = nx.read_graphml(filename_tsne)
+    g_knn = nx.read_graphml(filename_knn)
+
+    print("jaccard index (tsne, umap): ",
+          len(nx.intersection(g_tsne, g_umap).edges) / len(nx.compose(g_tsne, g_umap).edges))
+    print("jaccard index (tsne, knn): ",
+          len(nx.intersection(g_tsne, g_knn).edges) / len(nx.compose(g_tsne, g_knn).edges))
+    print("jaccard index (umap, knn): ",
+          len(nx.intersection(g_umap, g_knn).edges) / len(nx.compose(g_umap, g_knn).edges))
+
+    return
+
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    fig_1()
+    # fig_1()
     # fig_2()
     # fig_3()
     # fig_4()
-    # fig_5()
+    fig_5()
+    # faithfulness_graph_topologies()
