@@ -1,32 +1,25 @@
-import math
-
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
 from techniques.t_sne import TSNE
-from techniques.metrics import stress, neighborhood_preservation, neighborhood_hit
+from metrics.metrics import stress, neighborhood_preservation, neighborhood_hit
 
-from util import load_data
 from sklearn import preprocessing
 import sklearn.datasets as datasets
 
 from timeit import default_timer as timer
 from datetime import timedelta
 
-from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from sklearn.manifold import trustworthiness
 from sklearn.metrics import silhouette_score
-from sklearn.neighbors import KDTree
 from sklearn.decomposition import PCA
 
 from metrics.local import sortedness
 
 from scipy.stats import weightedtau
 from scipy.sparse import csr_matrix
-from scipy.spatial.distance import pdist
 
-import pandas as pd
 import random
 
 MACHINE_EPSILON = np.finfo(np.double).eps

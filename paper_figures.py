@@ -1,12 +1,11 @@
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
-import math
 
 from techniques.t_sne import TSNE
-from techniques.metrics import stress, neighborhood_preservation, neighborhood_hit
+from metrics.metrics import stress, neighborhood_preservation, neighborhood_hit
 
-from util import load_data, draw_graph_with_positions, draw_projection, draw_graph_no_positions
+from util import load_data, draw_graph_with_positions, draw_projection
 
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from sklearn.manifold import trustworthiness
@@ -18,7 +17,7 @@ from scipy.stats import weightedtau
 import seaborn as sns
 import pandas as pd
 
-from t_sne_bridging_dr_gd import tsne_prob_graph, draw_graph_by_tsne, remove_nodes_centrality, remove_nodes_random
+from t_sne_bridging_dr_gd import tsne_prob_graph, draw_graph_by_tsne, remove_nodes_centrality
 from util import draw_graph_forceatlas2, write_graphml
 
 from techniques.knn_gd import knn_graph
@@ -394,14 +393,14 @@ def fig_5():
 
     fig, ax = plt.subplots(figsize=(16, 14))
     sns.heatmap(new_df_metrics, cbar=False,
-                robust=True, annot_kws={"size": 25}, fmt=".4f",
+                robust=True, annot_kws={"size": 30}, fmt=".4f",
                 linewidths=2, linecolor='white', annot=new_df_metrics_original,
-                cbar_kws={'orientation': 'vertical'}, cmap=plt.cm.YlGnBu,
+                cbar_kws={'orientation': 'vertical'}, cmap=plt.cm.YlOrBr,
                 xticklabels=['N.Hit', 'N.Preservation', 'Silhouette', ' 1-Stress', 'Trustworthiness']
                 )
 
-    plt.yticks(rotation=0, fontsize=25)
-    plt.xticks(rotation=25, fontsize=25, ha='right')
+    plt.yticks(rotation=0, fontsize=30)
+    plt.xticks(rotation=25, fontsize=30, ha='right')
     ax.set(xlabel="", ylabel="")
     # plt.xticks(rotation=20, fontsize=20, ha='right')
     # plt.title(title, fontsize=30)

@@ -3,7 +3,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 from techniques.t_sne import TSNE
-from techniques.metrics import stress, neighborhood_preservation, neighborhood_hit
+from metrics.metrics import stress, neighborhood_preservation, neighborhood_hit
 
 from util import load_data, draw_graph_with_positions, draw_projection, draw_graph_no_positions
 
